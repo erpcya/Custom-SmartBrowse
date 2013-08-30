@@ -5,6 +5,7 @@
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/client"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/zkwebui/WEB-INF/src"/>
         <wb-resource deploy-path="/" source-path="/zkwebui"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/patches"/>
         <property name="context-root" value="LVE-SmartBrowse"/>
         <property name="java-output-path" value="/LVE-SmartBrowse/bin"/>
     </wb-module>
