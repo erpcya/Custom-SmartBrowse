@@ -1,6 +1,5 @@
 /******************************************************************************
  * Product: Adempiere ERP & CRM Smart Business Solution                       *
- * Copyright (C) 1999-2006 ComPiere, Inc. All Rights Reserved.                *
  * This program is free software; you can redistribute it and/or modify it    *
  * under the terms version 2 of the GNU General Public License as published   *
  * by the Free Software Foundation. This program is distributed in the hope   *
@@ -11,26 +10,26 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,    *
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.                     *
  * For the text or an alternative of this public license, you may reach us    *
- * ComPiere, Inc., 2620 Augustine Dr. #245, Santa Clara, CA 95054, USA        *
- * or via info@compiere.org or http://www.compiere.org/license.html           *
+ * Copyright (C) 2003-2013 E.R.P. Consultores y Asociados.                    *
+ * All Rights Reserved.                                                       *
+ * Contributor(s): Carlos Parada www.erpconsultoresyasociados.com             *
  *****************************************************************************/
 package org.eevolution.form;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyVetoException;
 import java.beans.VetoableChangeListener;
-import java.math.BigDecimal;
-import java.util.logging.Logger;
 
 import org.adempiere.model.MBrowseField;
 import org.compiere.minigrid.MiniCellEditor;
 import org.compiere.model.GridField;
+import org.compiere.util.CLogger;
 
 
 /**
  *  Browser Cell Editor extends of MiniTable Cell Editor based on class add listen funtionality
  *
- *  @author     Carlos Parada
+ *  @author     <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a>
  *  @version    $Id: BrowserCellEditor.java,v 1.0 2013/08/30 00:51:28 
  */
 public class BrowserCellEditor extends MiniCellEditor implements VetoableChangeListener
@@ -38,7 +37,7 @@ public class BrowserCellEditor extends MiniCellEditor implements VetoableChangeL
 
 	/** 
 	 * *** Builder of Class***
-	 * @author Carlos Parada 30/08/2013, 05:27:09
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 30/08/2013, 05:27:09
 	 * @param c
 	 * @param displayType
 	 * @param table
@@ -54,7 +53,7 @@ public class BrowserCellEditor extends MiniCellEditor implements VetoableChangeL
 	/**
 	 * 
 	 * *** Builder of Class***
-	 * @author Carlos Parada 30/08/2013, 05:27:36
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 30/08/2013, 05:27:36
 	 * @param c
 	 * @param table
 	 */
@@ -68,6 +67,7 @@ public class BrowserCellEditor extends MiniCellEditor implements VetoableChangeL
 	}
 
 	/**
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a>
 	 * Listener for implements Callouts
 	 */
 	@Override
@@ -76,11 +76,12 @@ public class BrowserCellEditor extends MiniCellEditor implements VetoableChangeL
 		// TODO Auto-generated method stub
 		if (!field.isReadOnly())
 		{
+			GridField field= new GridField(table.getTablemodel().getGridFieldVO(table.getBrowse().p_WindowNo, "", table.getSelectedColumn()));
 			
-			GridField field= new GridField(table.getTablemodel().getGridFieldVO(table.getBrowse().p_WindowNo, "", 3)); 
-			field.setValue(evt.getNewValue(),true);
-					
-			table.processCallout(field);
+			if (field.getCallout()!=null){
+				field.setValue(evt.getNewValue(),true);
+				table.processCallout(field);
+			}
 		}
 				
 	}
@@ -96,6 +97,7 @@ public class BrowserCellEditor extends MiniCellEditor implements VetoableChangeL
 	private MBrowseField field;
 
 	/**	Logger			*/
-	private static Logger log = Logger.getLogger(BrowserCellEditor.class.getName());
+	private static CLogger log = CLogger.getCLogger(BrowserCellEditor.class);
+	
 	
 }   //  BrowserCellEditor

@@ -55,7 +55,14 @@ public class BrowserRows {
 		voBase.Description = field.getDescription();
 		voBase.Help = uniqueName;
 		voBase.Header = title;
-		voBase.Callout = "org.eevolution.form.BrowserCallOutExample.methodExample";
+		/**
+		 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 02/09/2013, 07:02:36
+		 * Set Callout
+		 */
+		voBase.Callout = field.getCallout();//"org.eevolution.form.BrowserCallOutExample.methodExample";
+		/**
+		 * End Carlos Parada
+		 */
 		
 		GridField gField = new GridField(GridFieldVO.createParameter(voBase));
 		//  Set Default
@@ -108,7 +115,7 @@ public class BrowserRows {
 	
 	/**
 	 * 
-	 * @author Carlos Parada 27/08/2013, 18:31:29
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 02/09/2013, 07:02:36
 	 * @return
 	 * @return LinkedHashMap<Integer,MBrowseField>
 	 */
@@ -118,7 +125,7 @@ public class BrowserRows {
 	
 	/**
 	 * 
-	 * @author Carlos Parada 27/08/2013, 18:32:59
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 02/09/2013, 07:02:18
 	 * @return
 	 * @return LinkedHashMap<Integer,LinkedHashMap<Integer,Object>>
 	 */
@@ -128,7 +135,7 @@ public class BrowserRows {
 	
 	/**
 	 * 
-	 * @author Carlos Parada 27/08/2013, 18:46:23
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 02/09/2013, 07:02:22
 	 * @return
 	 * @return int
 	 */
@@ -139,7 +146,7 @@ public class BrowserRows {
 	
 	/**
 	 * 
-	 * @author Carlos Parada 28/08/2013, 16:24:47
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 02/09/2013, 07:02:27
 	 * @return void
 	 */
 	public void clear()

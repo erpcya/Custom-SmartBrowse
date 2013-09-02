@@ -1,3 +1,19 @@
+/******************************************************************************
+ * Product: Adempiere ERP & CRM Smart Business Solution                       *
+ * This program is free software; you can redistribute it and/or modify it    *
+ * under the terms version 2 of the GNU General Public License as published   *
+ * by the Free Software Foundation. This program is distributed in the hope   *
+ * that it will be useful, but WITHOUT ANY WARRANTY; without even the implied *
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.           *
+ * See the GNU General Public License for more details.                       *
+ * You should have received a copy of the GNU General Public License along    *
+ * with this program; if not, write to the Free Software Foundation, Inc.,    *
+ * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.                     *
+ * For the text or an alternative of this public license, you may reach us    *
+ * Copyright (C) 2003-2013 E.R.P. Consultores y Asociados.                    *
+ * All Rights Reserved.                                                       *
+ * Contributor(s): Carlos Parada www.erpconsultoresyasociados.com             *
+ *****************************************************************************/
 package org.eevolution.form;
 
 import java.awt.Insets;
@@ -30,41 +46,29 @@ import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Util;
 
-public class BrowserTable extends MiniTable //implements VetoableChangeListener
+/**
+ * 
+ * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 02/09/2013
+ *
+ */
+public class BrowserTable extends MiniTable
 
 {
 	/**
-	 * @author carlos 
-	 * @date 29/08/2013 12:26:32
+	 * 
+	 * *** Build Of Class ***
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 02/09/2013, 06:47:42
+	 * @param browse
 	 */
-	private static final long serialVersionUID = 1L;
-	
-	/**VBrowse */
-	private VBrowser browse;
-	
-	/** Browser Rows*/
-	private BrowserRows tablemodel = new BrowserRows();
-	
-	/**	Logger			*/
-	private static Logger log = Logger.getLogger(BrowserTable.class.getName());
-	
-	/** Active BrowseCallOuts **/
-	private List<String> activeCallouts = new ArrayList<String>();
-	
-	/** Active BrowseCallOutsInstances **/
-	private List<BrowserCallout> activeCalloutInstance = new ArrayList<BrowserCallout>();
-	
-	/** Context **/
-	private Properties ctx =Env.getCtx();   
-	
-	
 	public BrowserTable(VBrowser browse) {
 		// TODO Auto-generated constructor stub
 		this.browse=browse;
-		
-		
 	}
 	
+	/**
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 02/09/2013, 06:46:50
+	 * Sum Amts Selected
+	 */
 	@Override
 	public boolean editCellAt(int row, int column, EventObject e) {
 		// TODO Auto-generated method stub			
@@ -76,8 +80,7 @@ public class BrowserTable extends MiniTable //implements VetoableChangeListener
 	}
 	
 	/**
-	 * 
-	 * @author Carlos Parada 28/08/2013, 15:20:39
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 02/09/2013, 06:46:50
 	 * @param col
 	 * @param field
 	 * @return void
@@ -88,7 +91,8 @@ public class BrowserTable extends MiniTable //implements VetoableChangeListener
 		
 	}
 	
-	/**
+	/** 
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 02/09/2013, 06:46:11
 	 * Remove All Rows For a Minitable and BrowseRows 
 	 */
 	@Override
@@ -99,8 +103,8 @@ public class BrowserTable extends MiniTable //implements VetoableChangeListener
 	}
 	
 	/**
-	 * Set Value for a cell
-	 * @author Carlos Parada 29/08/2013, 05:00:30
+	 * 
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 02/09/2013, 06:46:11
 	 * @param row
 	 * @param col
 	 * @param value
@@ -111,42 +115,7 @@ public class BrowserTable extends MiniTable //implements VetoableChangeListener
 		//Set Value for BrowserRows and MiniTable
 		tablemodel.setValue(row, col, value);
 		setValueAt(value, row, col);
-		
-		//get Cell Editor for set listener
-		/*if (getCellEditor(row, col) instanceof org.compiere.minigrid.BrowseCellEditor && !table.getBrowseField(col).isReadOnly())
-		{
-			
-			BrowseCellEditor cel = (BrowseCellEditor)getCellEditor(row, col);
-			VEditor vEditor = (VEditor)cel.getTableCellEditorComponent(this, value, true, row, col);
-			vEditor.addVetoableChangeListener(
-					new VetoableChangeListener() {
-						
-						@Override
-						public void vetoableChange(PropertyChangeEvent evt)
-								throws PropertyVetoException {
-							// TODO Auto-generated method stub
-							System.out.println("Hola");
-						}
-					}
-					
-					);
-			
-		}*/
 	}
-
-	/*@Override
-	public void vetoableChange(PropertyChangeEvent evt)
-			throws PropertyVetoException {
-		// TODO Auto-generated method stub
-		
-		//System.out.println((VEditor)((BrowseCellEditor)getCellEditor(getEditingRow(),getEditingColumn())).getTableCellEditorComponent(this, null, true, getEditingRow(), getEditingColumn()));
-		//System.out.println(evt.getSource().equals(getCellEditor(getSelectedRow(),getSelectedColumn()).getTableCellEditorComponent(table, value, isSelected, row, column)));
-		//System.out.println(evt.getSource());
-		//if (evt.getNewValue())
-			//System.out.println("hola" + evt.getOldValue()+ evt.getNewValue().getClass());
-	}*/
-	
-	
 	
 	/**
 	 *  Overwrite for support BrowseCellEditor
@@ -160,6 +129,7 @@ public class BrowserTable extends MiniTable //implements VetoableChangeListener
 	 *  @param readOnly read only flag
 	 *  @param header optional header value
 	 */
+	@SuppressWarnings("rawtypes")
 	@Override
 	public void setColumnClass (int index, Class c, int displayType ,boolean readOnly, String header)
 	{
@@ -295,6 +265,7 @@ public class BrowserTable extends MiniTable //implements VetoableChangeListener
 	
 	
 	/**************************************************************************
+	 *  Adapted for Browse Callouts
 	 *  Process Callout(s).
 	 *  <p>
 	 *  The Callout is in the string of
@@ -433,7 +404,7 @@ public class BrowserTable extends MiniTable //implements VetoableChangeListener
 
 	/**
 	 * 
-	 * @author Carlos Parada 30/08/2013, 05:51:48
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 02/09/2013, 06:45:37
 	 * @return
 	 * @return BrowserRows
 	 */
@@ -443,14 +414,35 @@ public class BrowserTable extends MiniTable //implements VetoableChangeListener
 
 	/**
 	 * 
-	 * @author Carlos Parada 30/08/2013, 05:54:25
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 02/09/2013, 06:45:30
 	 * @return
 	 * @return VBrowser
 	 */
 	public VBrowser getBrowse() {
 		return browse;
 	}
+
 	
+	/** Serial Version*/
+	private static final long serialVersionUID = 1L;
+	
+	/**VBrowse */
+	private VBrowser browse;
+	
+	/** Browser Rows*/
+	private BrowserRows tablemodel = new BrowserRows();
+	
+	/**	Logger			*/
+	private static Logger log = Logger.getLogger(BrowserTable.class.getName());
+	
+	/** Active BrowseCallOuts **/
+	private List<String> activeCallouts = new ArrayList<String>();
+	
+	/** Active BrowseCallOutsInstances **/
+	private List<BrowserCallout> activeCalloutInstance = new ArrayList<BrowserCallout>();
+	
+	/** Context **/
+	private Properties ctx =Env.getCtx();   
 }
 
 
