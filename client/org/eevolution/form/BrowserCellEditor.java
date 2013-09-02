@@ -81,7 +81,7 @@ public class BrowserCellEditor extends MiniCellEditor implements VetoableChangeL
 			GridField field= new GridField(table.getTablemodel().getGridFieldVO(table.getBrowse().p_WindowNo, "", table.getSelectedColumn()));
 			
 			if (field.getCallout()!=null){
-				field.setValue(evt.getNewValue(),true);
+				field.setValue(evt.getNewValue(),false);
 				table.processCallout(field);
 			}
 		}
