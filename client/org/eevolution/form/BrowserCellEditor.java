@@ -42,6 +42,7 @@ public class BrowserCellEditor extends MiniCellEditor implements VetoableChangeL
 	 * @param displayType
 	 * @param table
 	 */
+	@SuppressWarnings("rawtypes")
 	public BrowserCellEditor(Class c, int displayType,MBrowseField field,BrowserTable table) {
 		super(c, displayType);
 		// TODO Auto-generated constructor stub
@@ -57,6 +58,7 @@ public class BrowserCellEditor extends MiniCellEditor implements VetoableChangeL
 	 * @param c
 	 * @param table
 	 */
+	@SuppressWarnings("rawtypes")
 	public BrowserCellEditor(Class c,MBrowseField field,BrowserTable table) {
 		super(c);
 		
@@ -97,6 +99,7 @@ public class BrowserCellEditor extends MiniCellEditor implements VetoableChangeL
 	private MBrowseField field;
 
 	/**	Logger			*/
+	@SuppressWarnings("unused")
 	private static CLogger log = CLogger.getCLogger(BrowserCellEditor.class);
 	
 	
