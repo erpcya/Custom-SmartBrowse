@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-modules id="moduleCoreId" project-version="1.5.0">
     <wb-module deploy-name="Custom-SmartBrowse">
-        <wb-resource deploy-path="/WEB-INF/classes" source-path="/base"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/client"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/zkwebui/WEB-INF/src"/>
         <wb-resource deploy-path="/" source-path="/zkwebui"/>
