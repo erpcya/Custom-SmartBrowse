@@ -126,7 +126,7 @@ public abstract class Browser {
 	public static final int WINDOW_WIDTH = 1024; // width of the window
 
 	/** String Array of Column Info */
-	public Info_Column[] m_generalLayout;
+	public MBrowseField[] m_generalLayout;
 	/** list of query columns */
 	public ArrayList<String> m_queryColumns = new ArrayList<String>();
 	/** list of query columns (SQL) */
@@ -162,7 +162,9 @@ public abstract class Browser {
 	public CLogger log = CLogger.getCLogger(getClass());
 
 	/** Layout of Grid */
-	public Info_Column[] p_layout;
+	public MBrowseField[] p_layout;
+	
+	
 	public String m_sqlMain;
 	/** Count SQL Statement */
 	public String m_sqlCount;
@@ -193,11 +195,21 @@ public abstract class Browser {
 			String keyColumn, boolean multiSelection, String where) {
 		m_Browse = browse;
 		m_View = browse.getAD_View();
+		List<MBrowseField> list = m_Browse.getFields();
+		// Convert List to Array
+		m_generalLayout = new MBrowseField[list.size()];
+		list.toArray(m_generalLayout);
+		
+		list = m_Browse.getDisplayFields();
+		p_layout = new MBrowseField[list.size()];
+		list.toArray(p_layout);
+		
 		p_WindowNo = WindowNo;
 		p_keyColumn = keyColumn;
 		p_multiSelection = multiSelection;
 		m_language = Language.getLanguage(Env
 				.getAD_Language(m_Browse.getCtx()));
+		
 
 		String whereClause = where != null ? where : "";
 
@@ -619,16 +631,17 @@ public abstract class Browser {
 				sqlOrderBy.append(",");
 
 			if (field.isOrderBy()) {
-				int orderByPosition = getOrderByPosition(field
+				sqlOrderBy.append(field.getAD_View_Column().getColumnName());
+				/*int orderByPosition = getOrderByPosition(field
 						.getAD_View_Column().getColumnName());
 				if (orderByPosition > 0)
-					sqlOrderBy.append(orderByPosition);
+					sqlOrderBy.append(orderByPosition);*/
 			}
 		}
 		return sqlOrderBy.length() > 0 ? "ORDER BY " + sqlOrderBy.toString()
 				: "";
 	}
-	
+	/*
 	private int getOrderByPosition(String name)
 	{
 		int colOffset = 1; // columns start with 1
@@ -645,7 +658,7 @@ public abstract class Browser {
 				return sortBySqlNo;
 		}
 		return 0;
-	}
+	}*/
 	
 	protected PreparedStatement getStatement(String sql) {
 		PreparedStatement stmt = null;
@@ -818,10 +831,11 @@ public abstract class Browser {
 					for (int col = 0; col < p_layout.length; col++) {
 
 						if (isFirstRow) {
-							String columnName = p_layout[col].getColHeader();
+							String columnName = p_layout[col].getName();
 							header.add(columnName);
 						}
 						Object data = null;
+						/* Pendiente Por Resolver
 						Class<?> c = p_layout[col].getColClass();
 						int colIndex = col + colOffset;
 						if (c == IDColumn.class && !p_layout[col].getColSQL().equals("'Row' AS \"Row\""))
@@ -848,6 +862,7 @@ public abstract class Browser {
 							data = m_rs.getString(colIndex);
 						
 						row.add(data);
+						*/
 					}
 					
 					if (isFirstRow)
