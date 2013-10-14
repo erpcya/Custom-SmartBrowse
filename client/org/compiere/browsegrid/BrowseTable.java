@@ -14,38 +14,33 @@
  * ComPiere, Inc., 2620 Augustine Dr. #245, Santa Clara, CA 95054, USA        *
  * or via info@compiere.org or http://www.compiere.org/license.html           *
  *****************************************************************************/
-package org.compiere.minigrid;
+package org.compiere.browsegrid;
 
 import java.awt.Component;
-import java.awt.Insets;
 import java.math.BigDecimal;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.logging.Level;
-
-import javax.swing.DefaultCellEditor;
-import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
-
+import org.adempiere.model.MBrowseField;
+import org.adempiere.model.MViewColumn;
 import org.compiere.apps.search.Info_Column;
+import org.compiere.browsegrid.VBrowseCellEditor;
 import org.compiere.grid.ed.VCellRenderer;
 import org.compiere.grid.ed.VHeaderRenderer;
-import org.compiere.model.MRole;
-import org.compiere.model.PO;
-import org.compiere.swing.CCheckBox;
+import org.compiere.model.GridField;
 import org.compiere.swing.CTable;
 import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
-import org.compiere.util.KeyNamePair;
 import org.compiere.util.Util;
+import org.compiere.minigrid.*;
+import org.eevolution.form.BrowserRows;
+import org.eevolution.form.VBrowser;
 
 /**
  *  Mini Table.
@@ -73,7 +68,7 @@ import org.compiere.util.Util;
  * 				<li>BF [ 2876895 ] MiniTable.loadTable: NPE if column is null
  * 					https://sourceforge.net/tracker/?func=detail&aid=2876895&group_id=176962&atid=879332
  */
-public class MiniTable extends CTable implements IMiniTable
+public class BrowseTable extends CTable implements IBrowseTable
 {
 	/**
 	 * 
@@ -83,20 +78,21 @@ public class MiniTable extends CTable implements IMiniTable
 	/**
 	 *  Default Constructor
 	 */
-	public MiniTable()
+	public BrowseTable(VBrowser vbrowse)
 	{
 		super();
-	//	log.config( "MiniTable");
 		setCellSelectionEnabled(false);
 		setRowSelectionAllowed(false);
 		//  Default Editor
 		this.setCellEditor(new ROCellEditor());
+		
+		this.vbrowse = vbrowse;
 	}   //  MiniTable
 
 	/** List of R/W columns     */
 	private ArrayList<Integer>   m_readWriteColumn = new ArrayList<Integer>();
 	/** List of Column Width    */
-	protected ArrayList<Integer>   m_minWidth = new ArrayList<Integer>();
+	private ArrayList<Integer>   m_minWidth = new ArrayList<Integer>();
 
 	/** Color Column Index of Model     */
 	private int         m_colorColumnIndex = -1;
@@ -109,11 +105,15 @@ public class MiniTable extends CTable implements IMiniTable
 	/** Lauout set in prepareTable and used in loadTable    */
 	private ColumnInfo[]        m_layout = null;
 	/**	Logger			*/
-	private static CLogger log = CLogger.getCLogger(MiniTable.class);
+	private static CLogger log = CLogger.getCLogger(BrowseTable.class);
 	/** Is Total Show */
 	private boolean showTotals = false;
 	private boolean autoResize = true;
+	
+	protected BrowserRows data= new BrowserRows();
 
+	protected VBrowser vbrowse; 
+	
 	public boolean isAutoResize() {
 		return autoResize;
 	}
@@ -247,7 +247,7 @@ public class MiniTable extends CTable implements IMiniTable
 
 	
 	/**************************************************************************
-	 *  Prepare Table and return SQL
+	 *  Prepare Table and return Only Select SQL
 	 *
 	 *  @param layout    array of column info
 	 *  @param from      SQL FROM content
@@ -256,49 +256,60 @@ public class MiniTable extends CTable implements IMiniTable
 	 *  @param tableName table name
 	 *  @return SQL
 	 */
-	public String prepareTable(ColumnInfo[] layout, 
-		String from, String where, boolean multiSelection, String tableName)
+	public String prepareTable(MBrowseField[] bfield, boolean multiSelection)
 	{
-		m_layout = layout;
+	
+	    MViewColumn vc =null;
 		m_multiSelection = multiSelection;
+		int col = 0;
 		//
-		StringBuffer sql = new StringBuffer ("SELECT ");
-		//  add columns & sql
-		for (int i = 0; i < layout.length; i++)
+		StringBuffer sql = new StringBuffer ("");
+		//  Add columns & sql
+		for (int i = 0; i < bfield.length; i++)
 		{
 			//  create sql
 			if (i > 0)
 				sql.append(", ");
-			sql.append(layout[i].getColSQL());
-			//  adding ID column
-			if (layout[i].isKeyPairCol())
-				sql.append(",").append(layout[i].getKeyPairColSQL());
-
-			//  add to model
-			addColumn(layout[i].getColHeader());
-			if (layout[i].isColorColumn())
-				setColorColumn(i);
-			if (layout[i].getColClass() == IDColumn.class)
-				p_keyColumnIndex = i;
-		}
-		//  set editors (two steps)
-		for (int i = 0; i < layout.length; i++)
-			setColumnClass(i, layout[i].getColClass(), layout[i].isReadOnly(), layout[i].getColHeader());
-
-		sql.append( " FROM ").append(from);
-		sql.append(" WHERE ").append(where);
-
-		//  Table Selection
-		setRowSelectionAllowed(true);
+			
+			vc = bfield[i].getAD_View_Column();
+			
+			//Set Columns to Query
+			sql.append(vc.getColumnSQL())
+				.append(" ")
+				.append("AS")
+				.append(" ")
+				.append(vc.getColumnName());
 		
-		//	org.compiere.apps.form.VMatch.dynInit calls routine for initial init only
-		if (from.length() == 0)
-			return sql.toString();
-		//
-		String finalSQL = MRole.getDefault().addAccessSQL(sql.toString(), 
-			tableName, MRole.SQL_FULLYQUALIFIED, MRole.SQL_RO);
-		log.finest(finalSQL);
-		return finalSQL;
+			if (bfield[i].isKey())
+				p_keyColumnIndex = col;
+			
+			//Add Browse Field
+			data.addBrowseField(i, bfield[i]);
+			bfield[i].setgField(new GridField(data.getGridFieldVO(vbrowse.p_WindowNo, bfield[i].getName(), i)));
+			//  add to model			
+			if (bfield[i].isDisplayed()){
+				addColumn(bfield[i].getName());				
+				col++;
+			}
+		}//Add columns & sql
+		
+		col=0;
+		for (int i = 0; i < bfield.length; i++)
+		{
+		//Set Columns Class
+			if (bfield[i].isDisplayed()){
+				setColumnClass(col,
+					bfield[i].getgField(),
+					bfield[i].getAD_Reference_ID(),
+					bfield[i].isReadOnly(), 
+					bfield[i].getName());
+				col++;
+			}
+		}//Set Column Class
+
+		//setRowSelectionAllowed(true);
+		return sql.toString();
+		
 	}   //  prepareTable
 
 	/**
@@ -310,6 +321,7 @@ public class MiniTable extends CTable implements IMiniTable
 	 */
 	public void addColumn (String header)
 	{
+		
 		if (getModel() instanceof DefaultTableModel)
 		{
 			DefaultTableModel model = (DefaultTableModel)getModel();
@@ -319,32 +331,6 @@ public class MiniTable extends CTable implements IMiniTable
 			throw new IllegalArgumentException("Model must be instance of DefaultTableModel");
 	}   //  addColumn
 
-	/**
-	 *  Set Column Editor & Renderer to Class.
-	 *  (after all columns were added)
-	 *  @param index column index
-	 *  @param c   class of column - determines renderere
-	 *  @param readOnly read only flag
-	 */
-	public void setColumnClass (int index, Class c, boolean readOnly)
-	{
-		setColumnClass(index, c, readOnly, null);
-	}   //  setColumnClass
-
-	/**
-	 *  Set Column Editor & Renderer to Class
-	 *  (after all columns were added)
-	 *  Lauout of IDColumn depemds on multiSelection
-	 *  @param index column index
-	 *  @param c   class of column - determines renderere/editors supported:
-	 *  IDColumn, Boolean, Double (Quantity), BigDecimal (Amount), Integer, Timestamp, String (default)
-	 *  @param readOnly read only flag
-	 *  @param header optional header value
-	 */
-	public void setColumnClass (int index, Class c, boolean readOnly, String header)
-	{
-		setColumnClass (index, c, 0  , readOnly, header);
-	}
 	
 	/**
 	 *  Set Column Editor & Renderer to Class
@@ -357,7 +343,7 @@ public class MiniTable extends CTable implements IMiniTable
 	 *  @param readOnly read only flag
 	 *  @param header optional header value
 	 */
-	public void setColumnClass (int index, Class c, int displayType ,boolean readOnly, String header)
+	/*public void setColumnClass (int index, Class c, int displayType ,boolean readOnly, String header)
 	{
 	//	log.config( "MiniTable.setColumnClass - " + index, c.getName() + ", r/o=" + readOnly);
 		TableColumn tc = getColumnModel().getColumn(index);
@@ -488,6 +474,53 @@ public class MiniTable extends CTable implements IMiniTable
 		}
 	//	log.fine( "Renderer=" + tc.getCellRenderer().toString() + ", Editor=" + tc.getCellEditor().toString());
 	}   //  setColumnClass
+*/
+	
+
+	public void setColumnClass (int index, GridField gField, int displayType ,boolean readOnly, String header)
+	{
+	//	log.config( "MiniTable.setColumnClass - " + index, c.getName() + ", r/o=" + readOnly);
+		TableColumn tc = getColumnModel().getColumn(index);
+		if (tc == null)
+			return;
+		
+		//  Set R/O
+		setColumnReadOnly(index, readOnly);
+
+		//  Header
+		if (header != null && header.length() > 0)
+			tc.setHeaderValue(Util.cleanAmp(header));
+
+		//  ID Column & Selection
+		if (index == p_keyColumnIndex)
+		{
+			tc.setCellRenderer(new IDColumnRenderer(m_multiSelection));
+			if (m_multiSelection)
+			{
+				tc.setCellEditor(new IDColumnEditor());
+				setColumnReadOnly(index, false);
+			}
+			else
+			{
+				tc.setCellEditor(new ROCellEditor());
+			}
+			m_minWidth.add(new Integer(10));
+			tc.setMaxWidth(20);
+			tc.setPreferredWidth(20);
+			tc.setResizable(false);
+			
+			tc.setHeaderRenderer(new VHeaderRenderer(DisplayType.Number));
+		}
+		else
+		{
+			tc.setCellRenderer(new VCellRenderer(gField));
+			tc.setCellEditor(new VBrowseCellEditor(gField));
+			m_minWidth.add(new Integer(30));
+			tc.setHeaderRenderer(new VHeaderRenderer(displayType));
+		}
+		
+	//	log.fine( "Renderer=" + tc.getCellRenderer().toString() + ", Editor=" + tc.getCellEditor().toString());
+	}   //  setColumnClass
 
 	/**
 	 *  Clear Table Content
@@ -511,7 +544,7 @@ public class MiniTable extends CTable implements IMiniTable
 	 *
 	 *  @param rs ResultSet with the column layout defined in prepareTable
 	 */
-	public void loadTable(ResultSet rs)
+	/*public void loadTable(ResultSet rs)
 	{
 		if (m_layout == null)
 			throw new UnsupportedOperationException("Layout not defined");
@@ -575,49 +608,8 @@ public class MiniTable extends CTable implements IMiniTable
 		log.config("Row(rs)=" + getRowCount());
 		
 		
-	}	//	loadTable
+	}*/	//	loadTable
 
-	/**
-	 *	Load Table from Object Array
-	 *  @param pos array of POs 
-	 */
-	public void loadTable(PO[] pos)
-	{
-		if (m_layout == null)
-			throw new UnsupportedOperationException("Layout not defined");
-
-		//  Clear Table
-		setRowCount(0);
-		//
-		for (int i = 0; i < pos.length; i++)
-		{
-			PO myPO = pos[i];
-			int row = getRowCount();
-			setRowCount(row+1);
-			
-			for (int col = 0; col < m_layout.length; col++)
-			{
-				String columnName = m_layout[col].getColSQL();
-				Object data = myPO.get_Value(columnName);
-				if (data != null)
-				{
-					Class<?> c = m_layout[col].getColClass();
-					if (c == IDColumn.class)
-						data = new IDColumn(((Integer)data).intValue());
-					else if (c == Double.class)
-						data = new Double(((BigDecimal)data).doubleValue());
-				}
-				//  store
-				setValueAt(data, row, col);
-			}
-		}
-		if(getShowTotals())
-			addTotals(m_layout);
-		autoSize();
-		log.config("Row(array)=" + getRowCount());
-	}	//	loadTable
-	
-	
 	/**
 	 *  Get the key of currently selected row based on layout defined in prepareTable
 	 *  @return ID if key
@@ -930,6 +922,39 @@ public class MiniTable extends CTable implements IMiniTable
 					setValueAt(null , row - 1, col );	
 			}	
 			
+		}
+	}
+
+	public BrowserRows getData() {
+		return data;
+	}
+
+	
+	public void setValueAt(MBrowseField bField,Object aValue, int row, int column,int index) {
+		// TODO Auto-generated method stub
+		
+		
+		GridField gField=(GridField)data.getValue(row, index);
+		
+		if (gField==null)
+		{
+			gField=data.getBrowseField(index).getgField();
+			gField.setValue(aValue, false);
+			data.setValue(row, index, gField);
+		}
+		else
+		{
+			gField.setValue(aValue, false);
+			data.setValue(row, index, gField);
+		}
+
+		
+		
+		if (gField.isDisplayed())
+		{
+			TableColumn tc = getColumnModel().getColumn(column);
+			System.out.println(tc.getCellEditor());
+			super.setValueAt(aValue, row, column);
 		}
 	}
 }   //  MiniTable

@@ -2,10 +2,13 @@ package org.eevolution.form;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.Properties;
 
 import org.adempiere.model.MBrowseField;
 import org.compiere.model.GridField;
 import org.compiere.model.GridFieldVO;
+import org.compiere.model.MLookupFactory;
+import org.compiere.model.MLookupInfo;
 
 public class BrowserRows {
 
@@ -27,8 +30,8 @@ public class BrowserRows {
 		
 		String uniqueName =  field.getAD_View_Column().getColumnSQL();
 		voBase.isProcess = true;
-		voBase.IsDisplayed = true;
-		voBase.IsReadOnly = true;
+		voBase.IsDisplayed = field.isDisplayed();
+		voBase.IsReadOnly = field.isReadOnly();
 		voBase.IsUpdateable = true;
 		voBase.WindowNo = windowNo;		
 		voBase.AD_Column_ID = field.getAD_View_Column().getAD_Column_ID();
@@ -55,11 +58,13 @@ public class BrowserRows {
 		voBase.Description = field.getDescription();
 		voBase.Help = uniqueName;
 		voBase.Header = title;
+		
 		/**
 		 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 02/09/2013, 07:02:36
 		 * Set Callout
 		 */
 		voBase.Callout = field.getCallout();//"org.eevolution.form.BrowserCallOutExample.methodExample";
+		voBase.initFinish();
 		/**
 		 * End Carlos Parada
 		 */
@@ -109,8 +114,12 @@ public class BrowserRows {
 	
 	public Object getValue(int id , int col)
 	{
-		LinkedHashMap<Integer, Object> values = rows.get(id);
-		return values.get(col);
+		if (rows.size() > id)
+		{
+			LinkedHashMap<Integer, Object> values = rows.get(id);
+			return values.get(col);
+		}
+		return null;
 	}
 	
 	/**

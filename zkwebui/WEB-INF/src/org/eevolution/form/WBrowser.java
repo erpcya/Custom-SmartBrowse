@@ -209,8 +209,8 @@ public class WBrowser extends Browser implements IFormController,
 			where.append(p_whereClause);
 		}
 
-		prepareTable(m_generalLayout, m_View.getFromClause(), where.toString(),
-				"2");
+		/*prepareTable(m_generalLayout, m_View.getFromClause(), where.toString(),
+				"2");*/ //Replantear
 		return true;
 	}
 
@@ -223,8 +223,8 @@ public class WBrowser extends Browser implements IFormController,
 		}
 		log.finest("Browse Fields #" + list.size());	
 		// Convert ArrayList to Array
-		m_generalLayout = new Info_Column[list.size()];
-		list.toArray(m_generalLayout);
+		/*m_generalLayout = new Info_Column[list.size()];
+		list.toArray(m_generalLayout);*/
 		return true;
 	}
 
@@ -350,7 +350,7 @@ public class WBrowser extends Browser implements IFormController,
 					if (dataColumn.isSelected()) {
 						LinkedHashMap<String, Object> values = new LinkedHashMap<String, Object>();
 						int col = 0;
-						for (Info_Column column : m_generalLayout)
+						/*for (Info_Column column : m_generalLayout)
 						{	
 							String columnName = column.getColSQL().substring(
 									column.getColSQL().indexOf("AS ") + 3);
@@ -367,7 +367,7 @@ public class WBrowser extends Browser implements IFormController,
 								}
 							}
 							col++;
-						}
+						}*/
 						if(values.size() > 0)
 						{
 							m_values.put(dataColumn.getRecord_ID(), values);
