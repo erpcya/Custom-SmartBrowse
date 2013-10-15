@@ -27,19 +27,13 @@ public interface IBrowseTable
 	
 	public void setColumnClass (int index, GridField gField,int displayType, boolean readOnly, String header);
 	
-	//public void setColumnClass (int index, Class classType, boolean readOnly);
-	
-	//public void loadTable(ResultSet rs);
-	
-	//public void loadTable(PO[] pos);
+
 	
 	public Integer getSelectedRowKey();
 	
 	public int getSelectedRow();
 	
 	public void setRowCount (int rowCount);
-	
-	public ColumnInfo[] getLayoutInfo();
 
 	public int getColumnCount();
 	

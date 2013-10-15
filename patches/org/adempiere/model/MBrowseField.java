@@ -43,6 +43,7 @@ public class MBrowseField extends X_AD_Browse_Field {
 	private static final long serialVersionUID = 3076943543303710639L;
 
 	private GridField gField ;
+	
 	/**
 	 * get Browse Field based on View Column
 	 * 
@@ -241,4 +242,5 @@ public class MBrowseField extends X_AD_Browse_Field {
 	public GridField getgField() {
 		return gField;
 	}
+	
 }

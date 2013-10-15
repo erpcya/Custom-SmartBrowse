@@ -21,6 +21,12 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Properties;
+import java.util.StringTokenizer;
+import java.util.logging.Level;
+
+import javax.script.ScriptEngine;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -28,17 +34,21 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import org.adempiere.model.MBrowseField;
 import org.adempiere.model.MViewColumn;
-import org.compiere.apps.search.Info_Column;
 import org.compiere.browsegrid.VBrowseCellEditor;
 import org.compiere.grid.ed.VCellRenderer;
 import org.compiere.grid.ed.VHeaderRenderer;
+import org.compiere.minigrid.IDColumn;
+import org.compiere.minigrid.IDColumnEditor;
+import org.compiere.minigrid.IDColumnRenderer;
+import org.compiere.minigrid.ROCellEditor;
 import org.compiere.model.GridField;
+import org.compiere.model.MRule;
 import org.compiere.swing.CTable;
 import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Util;
-import org.compiere.minigrid.*;
+import org.eevolution.form.BrowserCallout;
 import org.eevolution.form.BrowserRows;
 import org.eevolution.form.VBrowser;
 
@@ -103,7 +113,7 @@ public class BrowseTable extends CTable implements IBrowseTable
 	private boolean     m_multiSelection = false;
 
 	/** Lauout set in prepareTable and used in loadTable    */
-	private ColumnInfo[]        m_layout = null;
+	//private ColumnInfo[]        m_layout = null;
 	/**	Logger			*/
 	private static CLogger log = CLogger.getCLogger(BrowseTable.class);
 	/** Is Total Show */
@@ -113,6 +123,16 @@ public class BrowseTable extends CTable implements IBrowseTable
 	protected BrowserRows data= new BrowserRows();
 
 	protected VBrowser vbrowse; 
+	
+	/** Active BrowseCallOuts **/
+	private List<String> activeCallouts = new ArrayList<String>();
+	
+	/** Active BrowseCallOutsInstances **/
+	private List<BrowserCallout> activeCalloutInstance = new ArrayList<BrowserCallout>();
+	
+	/** Context **/
+	private Properties ctx =Env.getCtx();   
+	
 	
 	public boolean isAutoResize() {
 		return autoResize;
@@ -281,7 +301,8 @@ public class BrowseTable extends CTable implements IBrowseTable
 				.append(vc.getColumnName());
 		
 			if (bfield[i].isKey())
-				p_keyColumnIndex = col;
+				setKey(col);
+				
 			
 			//Add Browse Field
 			data.addBrowseField(i, bfield[i]);
@@ -343,140 +364,6 @@ public class BrowseTable extends CTable implements IBrowseTable
 	 *  @param readOnly read only flag
 	 *  @param header optional header value
 	 */
-	/*public void setColumnClass (int index, Class c, int displayType ,boolean readOnly, String header)
-	{
-	//	log.config( "MiniTable.setColumnClass - " + index, c.getName() + ", r/o=" + readOnly);
-		TableColumn tc = getColumnModel().getColumn(index);
-		if (tc == null)
-			return;
-		//  Set R/O
-		setColumnReadOnly(index, readOnly);
-
-		//  Header
-		if (header != null && header.length() > 0)
-			tc.setHeaderValue(Util.cleanAmp(header));
-
-		//  ID Column & Selection
-		if (c == IDColumn.class)
-		{
-			tc.setCellRenderer(new IDColumnRenderer(m_multiSelection));
-			if (m_multiSelection)
-			{
-				tc.setCellEditor(new IDColumnEditor());
-				setColumnReadOnly(index, false);
-			}
-			else
-			{
-				tc.setCellEditor(new ROCellEditor());
-			}
-			m_minWidth.add(new Integer(10));
-			tc.setMaxWidth(20);
-			tc.setPreferredWidth(20);
-			tc.setResizable(false);
-			
-			tc.setHeaderRenderer(new VHeaderRenderer(DisplayType.Number));
-		}
-		//  Boolean
-		else if (DisplayType.YesNo == displayType || c == Boolean.class )
-		{
-			tc.setCellRenderer(new CheckRenderer());
-			if (readOnly)
-				tc.setCellEditor(new ROCellEditor());
-			else
-			{
-				CCheckBox check = new CCheckBox();
-				check.setMargin(new Insets(0,0,0,0));
-				check.setHorizontalAlignment(SwingConstants.CENTER);
-				tc.setCellEditor(new DefaultCellEditor(check));
-			}
-			m_minWidth.add(new Integer(30));
-			
-			tc.setHeaderRenderer(new VHeaderRenderer(DisplayType.YesNo));
-		}
-		//  Date
-		else if (DisplayType.Date == displayType || DisplayType.DateTime == displayType ||  c == Timestamp.class )
-		{
-			if(DisplayType.DateTime == displayType)
-				tc.setCellRenderer(new VCellRenderer(DisplayType.DateTime));
-			else 
-				tc.setCellRenderer(new VCellRenderer(DisplayType.Date));
-			
-			if (readOnly)
-				tc.setCellEditor(new ROCellEditor());
-			else if (DisplayType.Date == displayType || DisplayType.DateTime == displayType)
-				tc.setCellEditor(new MiniCellEditor(c, displayType));
-			else 
-				tc.setCellEditor(new MiniCellEditor(c));
-			
-			m_minWidth.add(new Integer(30));
-			if (DisplayType.DateTime == displayType)
-				tc.setHeaderRenderer(new VHeaderRenderer(DisplayType.DateTime));
-			else 
-				tc.setHeaderRenderer(new VHeaderRenderer(DisplayType.Date));
-		}
-		//  Amount
-		else if (DisplayType.Amount == displayType || c == BigDecimal.class )
-		{
-			tc.setCellRenderer(new VCellRenderer(DisplayType.Amount));
-			if (readOnly)
-			{
-				tc.setCellEditor(new ROCellEditor());
-				m_minWidth.add(new Integer(70));
-			}
-			else
-			{
-				tc.setCellEditor(new MiniCellEditor(c));
-				m_minWidth.add(new Integer(80));
-			}
-			
-			tc.setHeaderRenderer(new VHeaderRenderer(DisplayType.Number));
-		}
-		//  Number
-		else if (DisplayType.Number == displayType || c == Double.class)
-		{
-			tc.setCellRenderer(new VCellRenderer(DisplayType.Number));
-			if (readOnly)
-			{
-				tc.setCellEditor(new ROCellEditor());
-				m_minWidth.add(new Integer(70));
-			}
-			else
-			{
-				tc.setCellEditor(new MiniCellEditor(c));
-				m_minWidth.add(new Integer(80));
-			}
-			
-			tc.setHeaderRenderer(new VHeaderRenderer(DisplayType.Number));
-		}
-		//  Integer
-		else if (DisplayType.Integer == displayType || c == Integer.class )
-		{
-			tc.setCellRenderer(new VCellRenderer(DisplayType.Integer));
-			if (readOnly)
-				tc.setCellEditor(new ROCellEditor());
-			else
-				tc.setCellEditor(new MiniCellEditor(c));
-			m_minWidth.add(new Integer(30));
-			
-			tc.setHeaderRenderer(new VHeaderRenderer(DisplayType.Number));
-		}
-		//  String
-		else
-		{
-			tc.setCellRenderer(new VCellRenderer(DisplayType.String));
-			if (readOnly)
-				tc.setCellEditor(new ROCellEditor());
-			else
-				tc.setCellEditor(new MiniCellEditor(String.class));
-			m_minWidth.add(new Integer(30));
-			
-			tc.setHeaderRenderer(new VHeaderRenderer(DisplayType.String));
-		}
-	//	log.fine( "Renderer=" + tc.getCellRenderer().toString() + ", Editor=" + tc.getCellEditor().toString());
-	}   //  setColumnClass
-*/
-	
-
 	public void setColumnClass (int index, GridField gField, int displayType ,boolean readOnly, String header)
 	{
 	//	log.config( "MiniTable.setColumnClass - " + index, c.getName() + ", r/o=" + readOnly);
@@ -538,85 +425,14 @@ public class BrowseTable extends CTable implements IBrowseTable
 			throw new IllegalArgumentException("Model must be instance of DefaultTableModel");
 	}   //  setRowCount
 
-	
-	/**************************************************************************
-	 *	Load Table from ResultSet - The ResultSet is not closed
-	 *
-	 *  @param rs ResultSet with the column layout defined in prepareTable
-	 */
-	/*public void loadTable(ResultSet rs)
-	{
-		if (m_layout == null)
-			throw new UnsupportedOperationException("Layout not defined");
-
-		//  Clear Table
-		setRowCount(0);
-		//
-		try
-		{
-			while (rs.next())
-			{
-				int row = getRowCount();
-				setRowCount(row+1);
-				int colOffset = 1;  //  columns start with 1
-				for (int col = 0; col < m_layout.length; col++)
-				{
-					Object data = null;
-					Class<?> c = m_layout[col].getColClass();
-					int colIndex = col + colOffset;
-					if (c == IDColumn.class)
-						data = new IDColumn(rs.getInt(colIndex));
-					else if (c == Boolean.class)
-						data = new Boolean("Y".equals(rs.getString(colIndex)));
-					else if (c == Timestamp.class)
-						data = rs.getTimestamp(colIndex);
-					else if (c == BigDecimal.class)
-						data = rs.getBigDecimal(colIndex);
-					else if (c == Double.class)
-						data = rs.getDouble(colIndex);
-					else if (c == Integer.class)
-						data = rs.getInt(colIndex);
-					else if (c == KeyNamePair.class)
-					{
-						String display = rs.getString(colIndex);
-						int key = rs.getInt(colIndex+1);
-						data = new KeyNamePair(key, display);
-						colOffset++;
-					}
-					else
-					{
-						String s = rs.getString(colIndex);
-						if (s != null)
-							data = s.trim();	//	problems with NCHAR
-					}
-					//  store
-					setValueAt(data, row, col);
-			//		log.fine( "r=" + row + ", c=" + col + " " + m_layout[col].getColHeader(),
-			//			"data=" + data.toString() + " " + data.getClass().getName() + " * " + m_table.getCellRenderer(row, col));
-				}
-				
-
-			}
-		}
-		catch (SQLException e)
-		{
-			log.log(Level.SEVERE, "", e);
-		}
-		if(getShowTotals())
-			addTotals(m_layout);
-		autoSize();
-		log.config("Row(rs)=" + getRowCount());
-		
-		
-	}*/	//	loadTable
-
 	/**
 	 *  Get the key of currently selected row based on layout defined in prepareTable
 	 *  @return ID if key
 	 */
 	public Integer getSelectedRowKey()
 	{
-		if (m_layout == null)
+		
+		if (data.getColumnCount() == 0)
 			throw new UnsupportedOperationException("Layout not defined");
 
 		int row = getSelectedRow();
@@ -636,7 +452,7 @@ public class BrowseTable extends CTable implements IBrowseTable
 	 */
 	public Collection<Integer> getSelectedKeys()
 	{
-		if (m_layout == null)
+		if (data.getColumnCount() == 0)
 		{
 			throw new UnsupportedOperationException("Layout not defined");
 		}
@@ -660,15 +476,6 @@ public class BrowseTable extends CTable implements IBrowseTable
 		}
 		return list;
 	}
-
-	/**************************************************************************
-	 *  Get Layout
-	 *  @return Array of ColumnInfo
-	 */
-	public ColumnInfo[] getLayoutInfo()
-	{
-		return m_layout;
-	}   //  getLayout
 
 	/**
 	 *  Set Single Selection
@@ -778,22 +585,21 @@ public class BrowseTable extends CTable implements IBrowseTable
 	/**
 	 *  Adding a new row with the totals
 	 */
-	public void addTotals(ColumnInfo[] layout)
+	public void addTotals()
 	{
-		if (getRowCount() == 0 || layout.length == 0)
+		if (getRowCount() == 0 || this.data.getViewColumns() == 0)
 			return;
 		
-		Object[] total = new Object[layout.length];
+		Object[] total = new Object[this.data.getViewColumns()];
 		
-		for (int row = 0 ; row < getRowCount(); row ++)
-		{
+		for (int row = 0 ; row < getRowCount(); row ++){
 
-				for (int col = 0; col < layout.length; col++)
-				{
+				for (int col = 0; col < this.data.getViewColumns(); col++){
 					Object data = getModel().getValueAt(row, col);
-					Class<?> c = layout[col].getColClass();
-					if (c == BigDecimal.class)
-					{	
+					//Class<?> c = layout[col].getColClass();
+					int ReferenceType = this.data.getBrowseField(this.data.getDisplay_index(col)).getAD_Reference_ID();
+					//if (c == BigDecimal.class)
+					if(ReferenceType == DisplayType.Amount){	
 						BigDecimal subtotal = Env.ZERO;
 						if(total[col]!= null)
 							subtotal = (BigDecimal)(total[col]);
@@ -805,20 +611,6 @@ public class BrowseTable extends CTable implements IBrowseTable
 							amt = Env.ZERO;
 						total[col] = subtotal.add(amt);
 					}
-					else if (c == Double.class)
-					{
-						Double subtotal = new Double(0);
-						if(total[col] != null)
-							subtotal = (Double)(total[col]);
-						
-						Double amt =  (Double) data;
-						if(subtotal == null)
-							subtotal = new Double(0);
-						if(amt == null )
-							subtotal = new Double(0);
-						total[col] = subtotal + amt;
-						
-					}		
 				}	
 		}
 		
@@ -826,23 +618,15 @@ public class BrowseTable extends CTable implements IBrowseTable
 
 		int row = getRowCount() + 1;
 		setRowCount(row);
-		for (int col = 0; col < layout.length; col++)
+		for (int col = 0; col < this.data.getViewColumns(); col++)
 		{
-			Class<?> c = layout[col].getColClass();
-			if (c == BigDecimal.class)
-			{	
+			//Class<?> c = layout[col].getColClass();
+			MBrowseField bField = this.data.getBrowseField(this.data.getDisplay_index(col));
+			if(bField.getAD_Reference_ID() == DisplayType.Amount)	
 				setValueAt(total[col] , row - 1, col);
-			}
-			else if (c == Double.class)
-			{
-				setValueAt(total[col] , row -1 , col);
-			}
-			else
-			{	
-				if(col == 0 )
-				{	
+			else{	
+				if(bField.isKey())
 					setValueAt(" Σ  " , row -1 , col);
-				}	
 				else
 					setValueAt(null , row - 1, col );	
 			}	
@@ -851,85 +635,25 @@ public class BrowseTable extends CTable implements IBrowseTable
 	}
 
 	/**
-	 *  Adding a new row with the totals
+	 * Get Browse Rows Data 
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 15/10/2013, 10:01:47
+	 * @return
+	 * @return BrowserRows
 	 */
-	public void addTotals(Info_Column[] layout)
-	{
-		if (getRowCount() == 0 || layout.length == 0)
-			return;
-		
-		Object[] total = new Object[layout.length];
-		
-		for (int row = 0 ; row < getRowCount(); row ++)
-		{
-
-				for (int col = 0; col < layout.length; col++)
-				{
-					Object data = getModel().getValueAt(row, col);
-					Class<?> c = layout[col].getColClass();
-					if (c == BigDecimal.class)
-					{	
-						BigDecimal subtotal = Env.ZERO;
-						if(total[col]!= null)
-							subtotal = (BigDecimal)(total[col]);
-							
-						BigDecimal amt =  (BigDecimal) data;
-						if(subtotal == null)
-							subtotal = Env.ZERO;
-						if(amt == null )
-							amt = Env.ZERO;
-						total[col] = subtotal.add(amt);
-					}
-					else if (c == Double.class)
-					{
-						Double subtotal = new Double(0);
-						if(total[col] != null)
-							subtotal = (Double)(total[col]);
-						
-						Double amt =  (Double) data;
-						if(subtotal == null)
-							subtotal = new Double(0);
-						if(amt == null )
-							subtotal = new Double(0);
-						total[col] = subtotal + amt;
-						
-					}		
-				}	
-		}
-		
-		//adding total row
-
-		int row = getRowCount() + 1;
-		setRowCount(row);
-		for (int col = 0; col < layout.length; col++)
-		{
-			Class<?> c = layout[col].getColClass();
-			if (c == BigDecimal.class)
-			{	
-				setValueAt(total[col] , row - 1, col);
-			}
-			else if (c == Double.class)
-			{
-				setValueAt(total[col] , row -1 , col);
-			}
-			else
-			{	
-				if(col == 1 )
-				{	
-					setValueAt(" Σ  " , row -1 , col );
-				}	
-				else
-					setValueAt(null , row - 1, col );	
-			}	
-			
-		}
-	}
-
 	public BrowserRows getData() {
 		return data;
 	}
 
-	
+	/**
+	 * Set Value with BrowseField
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 15/10/2013, 10:02:04
+	 * @param bField
+	 * @param aValue
+	 * @param row
+	 * @param column
+	 * @param index
+	 * @return void
+	 */
 	public void setValueAt(MBrowseField bField,Object aValue, int row, int column,int index) {
 		// TODO Auto-generated method stub
 		
@@ -948,13 +672,165 @@ public class BrowseTable extends CTable implements IBrowseTable
 			data.setValue(row, index, gField);
 		}
 
+		if (gField.isDisplayed())
+			super.setValueAt(aValue, row, column);
 		
+	}
+	
+	public void setValueAt(GridField gField,Object aValue, int row, int column) {
+		// TODO Auto-generated method stub
+		
+		if (gField==null)
+			throw new UnsupportedOperationException("No GridField");
+		
+		gField.setValue(aValue, false);
+		data.setValue(row, data.getIndex_display(column), gField);
 		
 		if (gField.isDisplayed())
-		{
-			TableColumn tc = getColumnModel().getColumn(column);
-			System.out.println(tc.getCellEditor());
 			super.setValueAt(aValue, row, column);
-		}
 	}
-}   //  MiniTable
+
+	private void setKey(int col)
+	{
+		p_keyColumnIndex = col;
+		vbrowse.m_keyColumnIndex=col;
+	}
+	
+	/**************************************************************************
+	 *  Adapted for Browse Callouts
+	 *  Process Callout(s).
+	 *  <p>
+	 *  The Callout is in the string of
+	 *  "class.method;class.method;"
+	 * If there is no class name, i.e. only a method name, the class is regarded
+	 * as CalloutSystem.
+	 * The class needs to comply with the Interface Callout.
+	 *
+	 * For a limited time, the old notation of Sx_matheod / Ux_menthod is maintained.
+	 *
+	 * @param field field
+	 * @return error message or ""
+	 * @see org.compiere.model.Callout
+	 */
+	public String processCallout (GridField field)
+	{
+		String callout = field.getCallout();
+		if (callout.length() == 0)
+			return "";
+
+
+		Object value = field.getValue();
+		Object oldValue = field.getOldValue();
+		log.fine(field.getColumnName() + "=" + value
+			+ " (" + callout + ") - old=" + oldValue);
+
+		StringTokenizer st = new StringTokenizer(callout, ";,", false);
+		while (st.hasMoreTokens())      //  for each callout
+		{
+			String cmd = st.nextToken().trim();
+			
+			//detect infinite loop
+			if (activeCallouts.contains(cmd)) continue;
+			
+			String retValue = "";
+			// FR [1877902]
+			// CarlosRuiz - globalqss - implement beanshell callout
+			// Victor Perez  - vpj-cd implement JSR 223 Scripting
+			if (cmd.toLowerCase().startsWith(MRule.SCRIPT_PREFIX)) {
+				
+				MRule rule = MRule.get(ctx, cmd.substring(MRule.SCRIPT_PREFIX.length()));
+				if (rule == null) {
+					retValue = "Callout " + cmd + " not found"; 
+					log.log(Level.SEVERE, retValue);
+					return retValue;
+				}
+				if ( !  (rule.getEventType().equals(MRule.EVENTTYPE_Callout) 
+					  && rule.getRuleType().equals(MRule.RULETYPE_JSR223ScriptingAPIs))) {
+					retValue = "Callout " + cmd
+						+ " must be of type JSR 223 and event Callout"; 
+					log.log(Level.SEVERE, retValue);
+					return retValue;
+				}
+
+				ScriptEngine engine = rule.getScriptEngine();
+
+				// Window context are    W_
+				// Login context  are    G_
+				MRule.setContext(engine, ctx, vbrowse.p_WindowNo);
+				// now add the callout parameters windowNo, tab, field, value, oldValue to the engine 
+				// Method arguments context are A_
+				engine.put(MRule.ARGUMENTS_PREFIX + "WindowNo", vbrowse.p_WindowNo);
+				engine.put(MRule.ARGUMENTS_PREFIX + "Tab", this);
+				engine.put(MRule.ARGUMENTS_PREFIX + "Field", field);
+				engine.put(MRule.ARGUMENTS_PREFIX + "Value", value);
+				engine.put(MRule.ARGUMENTS_PREFIX + "OldValue", oldValue);
+				engine.put(MRule.ARGUMENTS_PREFIX + "Ctx", ctx);
+
+				try 
+				{
+					activeCallouts.add(cmd);
+					retValue = engine.eval(rule.getScript()).toString();
+				}
+				catch (Exception e)
+				{
+					log.log(Level.SEVERE, "", e);
+					retValue = 	"Callout Invalid: " + e.toString();
+					return retValue;
+				}
+				finally
+				{
+					activeCallouts.remove(cmd);
+				}
+				
+			} else {
+
+				BrowserCallout call = null;
+				String method = null;
+				int methodStart = cmd.lastIndexOf('.');
+				try
+				{
+					if (methodStart != -1)      //  no class
+					{
+						Class<?> cClass = Class.forName(cmd.substring(0,methodStart));
+						call = (BrowserCallout)cClass.newInstance();
+						method = cmd.substring(methodStart+1);
+					}
+				}
+				catch (Exception e)
+				{
+					log.log(Level.SEVERE, "class", e);
+					return "Callout Invalid: " + cmd + " (" + e.toString() + ")";
+				}
+
+				if (call == null || method == null || method.length() == 0)
+					return "Callout Invalid: " + method;
+
+				try
+				{
+					activeCallouts.add(cmd);
+					activeCalloutInstance.add(call);
+					retValue = call.start(ctx, method, vbrowse.p_WindowNo, data , field, value, oldValue);
+				}
+				catch (Exception e)
+				{
+					log.log(Level.SEVERE, "start", e);
+					retValue = 	"Callout Invalid: " + e.toString();
+					return retValue;
+				}
+				finally
+				{
+					activeCallouts.remove(cmd);
+					activeCalloutInstance.remove(call);
+				}
+				
+			}			
+			
+			if (!Util.isEmpty(retValue))		//	interrupt on first error
+			{
+				log.severe (retValue);
+				return retValue;
+			}
+		}   //  for each callout
+		return "";
+	}	//	processCallout
+}   //  BrowseTable
