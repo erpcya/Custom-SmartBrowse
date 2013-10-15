@@ -16,8 +16,12 @@ public class BrowserRows {
 	GridField m_grid_field = null;
 	private Integer column = null;
 	private Integer row = null;
+	private Integer viewColumns=0;
 	private LinkedHashMap<Integer, LinkedHashMap<Integer, Object>> rows = new LinkedHashMap<Integer, LinkedHashMap<Integer, Object>>();
 	private LinkedHashMap<Integer, MBrowseField> browser_head = new LinkedHashMap<Integer, MBrowseField>();
+	private LinkedHashMap<Integer, Integer> display_indexes =new LinkedHashMap<Integer, Integer>(); 
+	private LinkedHashMap<Integer, Integer> indexes_display =new LinkedHashMap<Integer, Integer>();
+	
 	
 	public BrowserRows() {
 	}
@@ -79,6 +83,13 @@ public class BrowserRows {
 	
 	public void addBrowseField(int col , MBrowseField field)
 	{
+		
+		if (field.isDisplayed()){
+			indexes_display.put(col,viewColumns);
+			display_indexes.put(viewColumns,col);
+			viewColumns++;
+		}
+		
 		browser_head.put(col, field);
 	}
 
@@ -161,5 +172,36 @@ public class BrowserRows {
 	public void clear()
 	{
 		rows.clear();
+	}
+	
+	/**
+	 * Get Number of Columns
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 15/10/2013, 09:44:11
+	 * @return
+	 * @return int
+	 */
+	public int getColumnCount()
+	{
+		return browser_head.size();
+	}
+	
+	
+	/**
+	 * Returns Qty Columns Displayed
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 15/10/2013, 11:09:56
+	 * @return
+	 * @return Integer
+	 */
+	public Integer getViewColumns() {
+		return viewColumns;
+	}
+
+	public int getIndex_display(int index) {
+		
+		return indexes_display.get(index);
+	}
+	
+	public int getDisplay_index(int display) {
+		return display_indexes.get(display);
 	}
 }

@@ -30,7 +30,6 @@ import javax.swing.BorderFactory;
 import javax.swing.JComboBox;
 import javax.swing.JTable;
 import javax.swing.UIManager;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 
 import org.adempiere.plaf.AdempierePLAF;
@@ -38,7 +37,6 @@ import org.compiere.grid.ed.VEditor;
 import org.compiere.grid.ed.VEditorFactory;
 import org.compiere.grid.ed.VLookup;
 import org.compiere.model.GridField;
-import org.compiere.model.GridTable;
 import org.compiere.util.CLogger;
 
 /**
@@ -80,10 +78,11 @@ public final class VBrowseCellEditor extends AbstractCellEditor
 	private VEditor	        m_editor = null;
 	
 	/** Table                   */
-	private JTable          m_table = null;
+	private BrowseTable          m_table = null;
 	private ActionListener buttonListener;
 	private ActionListener actionListener;
-	
+	int m_Row =-1;
+	int m_Col=-1;
 	/** ClickCount              */
 	private static int      CLICK_TO_START = 1;
 	/**	Logger			*/
@@ -152,9 +151,11 @@ public final class VBrowseCellEditor extends AbstractCellEditor
 			((VLookup)m_editor).setStopEditing(false);
 		}
 		
+		m_Row= row;
+		m_Col =col;
 		m_editor.setReadWrite(m_mField.isEditable (false));
 
-		m_table = table;
+		m_table = (BrowseTable)table;
 
 		//	Set Value
 		m_editor.setValue(value);
@@ -211,6 +212,14 @@ public final class VBrowseCellEditor extends AbstractCellEditor
 		if (m_table == null)
 			return;
 		log.fine(e.getPropertyName() + "=" + e.getNewValue());
+		if (e.getOldValue()!=e.getNewValue())
+		{
+			m_table.setValueAt(m_mField, e.getNewValue(), m_Row, m_Col);
+			if (m_mField.getCallout()!=null){
+				
+				m_table.processCallout(m_mField);
+			}
+		}
 		//
 		//((DefaultTableModel)m_table.getModel()).setChanged(true);
 	}   //  vetoableChange
@@ -234,6 +243,7 @@ public final class VBrowseCellEditor extends AbstractCellEditor
 		log.finer(m_mField.getColumnName() + ": Value=" + m_editor.getValue());
 		if (e.getSource() == m_editor && actionListener != null)
 			actionListener.actionPerformed(e);
+		
 	}   //  actionPerformed
 
 	/**
