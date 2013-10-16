@@ -809,7 +809,7 @@ public class BrowseTable extends CTable implements IBrowseTable
 				{
 					activeCallouts.add(cmd);
 					activeCalloutInstance.add(call);
-					retValue = call.start(ctx, method, vbrowse.p_WindowNo, data , field, value, oldValue);
+					retValue = call.start(ctx, method, vbrowse.p_WindowNo, data, field, value, oldValue);
 				}
 				catch (Exception e)
 				{

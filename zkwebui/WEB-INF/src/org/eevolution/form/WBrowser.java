@@ -215,13 +215,13 @@ public class WBrowser extends Browser implements IFormController,
 	}
 
 	private boolean initBrowserTable() {
-		ArrayList<Info_Column> list = initBrowserData();
+		/*ArrayList<Info_Column> list = initBrowserData();
 		if (list.size() == 0) {
 
 			log.log(Level.SEVERE, "No Brwose for view=" + m_View.getName());
 			return false;
 		}
-		log.finest("Browse Fields #" + list.size());	
+		log.finest("Browse Fields #" + list.size());*/	
 		// Convert ArrayList to Array
 		/*m_generalLayout = new Info_Column[list.size()];
 		list.toArray(m_generalLayout);*/
@@ -264,7 +264,7 @@ public class WBrowser extends Browser implements IFormController,
 
 	protected void prepareTable(Info_Column[] layout, String from,
 			String staticWhere, String orderBy) {
-		p_layout = layout;
+		//p_layout = layout;
 		detail.prepareTable(layout, "" , "" , true, "");
 		StringBuffer sql = new StringBuffer("SELECT DISTINCT ");
 		for (int i = 0; i < layout.length; i++) {

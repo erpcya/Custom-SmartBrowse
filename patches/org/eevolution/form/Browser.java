@@ -229,120 +229,7 @@ public abstract class Browser {
 		log.info(m_Browse.getName() + " - " + keyColumn + " - " + whereClause);
 	}
 
-	@SuppressWarnings("rawtypes")
-	public ArrayList<Info_Column> initBrowserData() {
-		List<MBrowseField> fields = m_Browse.getDisplayFields();
-		ArrayList<Info_Column> list = new ArrayList<Info_Column>();
-		
-		MBrowseField fieldKey =  m_Browse.getFieldKey();
-		if(fieldKey != null)
-		{
-			String columnSql = fieldKey.getAD_View_Column().getColumnSQL() + " AS "+ fieldKey.getAD_View_Column().getColumnName();
-			Info_Column infoCol = new Info_Column(fieldKey.getName(), columnSql , IDColumn.class , "" );
-			infoCol.setReadOnly(false);
-			list.add(infoCol);
-		}
-		else
-		{
-			Info_Column infoCol = new Info_Column("Row", "'Row' AS \"Row\"", IDColumn.class  , "" );
-			infoCol.setReadOnly(false);
-			list.add(infoCol);
-		}
-			
-
-		for (MBrowseField field : fields) {
-			MViewColumn vcol = field.getAD_View_Column();
-
-			//String title = m_Browse.getTitle();
-			MColumn column =  vcol.getAD_Column();
-			String columnName = column.getColumnName();
-			
-			if (field.isQueryCriteria()) {
-				m_queryColumns.add(field.getName());
-			}
-			m_queryColumnsSql.add(vcol.getColumnSQL());
-
-			int displayType = field.getAD_Reference_ID();
-			if(field.isKey())
-				continue;
-			boolean isDisplayed = field.isDisplayed();
-			// Defines Field as Y-Axis
-			if(field.getAxis_Column_ID() > 0)
-			{
-					ArrayList<Info_Column> vlist = getInfoColumnForAxisField(field);
-					for (Info_Column infoCol : vlist){
-						list.add(infoCol);
-					}
-					continue;	
-			}
-			
-			String IDcolSQL = "";
-			String columnSql = vcol.getColumnSQL() + " AS "
-					+ vcol.getColumnName();
-			if (columnSql == null || columnSql.length() == 0)
-				columnSql = columnName;
-			// Default
-			StringBuilder colSql = new StringBuilder(columnSql);
-			Class colClass = null;
-			if (!isDisplayed)
-				;
-			else if (column.isVirtualColumn())
-			{
-				colSql = new StringBuilder("(" + column.getColumnSQL() + ")");
-				colClass = String.class;
-			}
-			else if (DisplayType.YesNo == displayType)
-				colClass = Boolean.class;
-			else if (DisplayType.Amount == displayType)
-				colClass = BigDecimal.class;
-			else if (DisplayType.Number == displayType
-					|| DisplayType.Quantity == displayType)
-				colClass = Double.class;
-			else if (DisplayType.Integer == displayType)
-				colClass = Integer.class;
-			else if (DisplayType.TableDir == displayType
-					|| DisplayType.Search == displayType) {
-				String alias = vcol.getAD_View_Definition().getTableAlias();
-				colSql = new StringBuilder("("
-						+ MLookupFactory.getLookup_TableDirEmbed(m_language,
-								columnName, alias) + ") AS "
-						+ vcol.getColumnName());
-				IDcolSQL = vcol.getColumnSQL();
-				colClass = KeyNamePair.class;
-			} else if (DisplayType.Table == displayType) {
-				String alias = vcol.getAD_View_Definition().getTableAlias();
-				colSql = new StringBuilder("("
-						+ MLookupFactory.getLookup_TableEmbed(m_language,
-								columnName, alias,
-								field.getAD_Reference_Value_ID()) + ") AS "
-						+ vcol.getColumnName());
-				IDcolSQL = vcol.getColumnSQL();
-				colClass = KeyNamePair.class;
-			} else if (DisplayType.String == displayType
-					|| DisplayType.Text == displayType
-					|| DisplayType.Memo == displayType)
-				colClass = String.class;
-			else if (DisplayType.isDate(displayType))
-				colClass = Timestamp.class;
-			else if (DisplayType.List == displayType) {
-				colSql = new StringBuilder("("
-						+ MLookupFactory.getLookup_ListEmbed(m_language,
-								field.getAD_Reference_Value_ID(),
-								vcol.getColumnSQL()) + ") AS "
-						+ vcol.getColumnName());
-				colClass = String.class;;
-			}
-			if (colClass != null) {
-				Info_Column infocol = new Info_Column(field.getName(), colSql.toString(), colClass , IDcolSQL );
-				infocol.setReadOnly(field.isReadOnly());
-				list.add(infocol);
-				log.finest("Added Field=" + columnName + " Name=" + field.getName());
-			} else
-				log.finest("Not Added Field=" +  columnName + "Name=" + field.getName());
-		}		
-		return list;
-	}
-
+	
 	public ArrayList<Object> getParameters() {
 		return m_parameters;
 	}
@@ -632,34 +519,12 @@ public abstract class Browser {
 
 			if (field.isOrderBy()) {
 				sqlOrderBy.append(field.getAD_View_Column().getColumnName());
-				/*int orderByPosition = getOrderByPosition(field
-						.getAD_View_Column().getColumnName());
-				if (orderByPosition > 0)
-					sqlOrderBy.append(orderByPosition);*/
 			}
 		}
 		return sqlOrderBy.length() > 0 ? "ORDER BY " + sqlOrderBy.toString()
 				: "";
 	}
-	/*
-	private int getOrderByPosition(String name)
-	{
-		int colOffset = 1; // columns start with 1
-		for (int col = 0; col < p_layout.length; col++) {
-			Info_Column column = p_layout[col];
-			String columnName = column.getColSQL().substring(
-					column.getColSQL().indexOf("AS ") + 3);
-
-			Class<?> c = column.getColClass();
-			int sortBySqlNo = col + colOffset;
-			if (c == KeyNamePair.class)
-				colOffset++;
-			if(name.equals(columnName))
-				return sortBySqlNo;
-		}
-		return 0;
-	}*/
-	
+		
 	protected PreparedStatement getStatement(String sql) {
 		PreparedStatement stmt = null;
 		try {
@@ -835,34 +700,31 @@ public abstract class Browser {
 							header.add(columnName);
 						}
 						Object data = null;
-						/* Pendiente Por Resolver
-						Class<?> c = p_layout[col].getColClass();
+						/* Pendiente Por Resolver*/
+						//Class<?> c = p_layout[col].getColClass();
+						MBrowseField bField = p_layout[col];
 						int colIndex = col + colOffset;
-						if (c == IDColumn.class && !p_layout[col].getColSQL().equals("'Row' AS \"Row\""))
+						if(bField.isKey())
 							data = new IDColumn(m_rs.getInt(colIndex));
-						else if (c == IDColumn.class && p_layout[col].getColSQL().equals("'Row' AS \"Row\""))
-							data = new IDColumn(no);
-						else if (c == Boolean.class)
+						else if (bField.getAD_Reference_ID() == DisplayType.YesNo)
 							data = new Boolean("Y".equals(m_rs
 									.getString(colIndex)));
-						else if (c == Timestamp.class)
+						else if (bField.getAD_Reference_ID() == DisplayType.Date || bField.getAD_Reference_ID() == DisplayType.DateTime )
 							data = m_rs.getTimestamp(colIndex);
-						else if (c == BigDecimal.class)
+						else if (bField.getAD_Reference_ID() == DisplayType.Number || bField.getAD_Reference_ID() == DisplayType.Amount)
 							data = m_rs.getBigDecimal(colIndex);
-						else if (c == Double.class)
-							data = new Double(m_rs.getDouble(colIndex));
-						else if (c == Integer.class)
+						else if (bField.getAD_Reference_ID() == DisplayType.Integer)
 							data = new Integer(m_rs.getInt(colIndex));
-						else if (c == KeyNamePair.class) {
+						/*else if (c == KeyNamePair.class) {
 							String display = m_rs.getString(colIndex);
 							int key = m_rs.getInt(colIndex + 1);
 							data = new KeyNamePair(key, display);
 							colOffset++;
-						} else
+						}*/ else
 							data = m_rs.getString(colIndex);
 						
 						row.add(data);
-						*/
+						
 					}
 					
 					if (isFirstRow)
