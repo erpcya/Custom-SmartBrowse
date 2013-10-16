@@ -683,8 +683,9 @@ public class BrowseTable extends CTable implements IBrowseTable
 		if (gField==null)
 			throw new UnsupportedOperationException("No GridField");
 		
-		gField.setValue(aValue, false);
-		data.setValue(row, data.getIndex_display(column), gField);
+		GridField gf = new GridField(gField.getVO());
+		gf.setValue(aValue, false);
+		data.setValue(row, data.getDisplay_index(column), gf);
 		
 		if (gField.isDisplayed())
 			super.setValueAt(aValue, row, column);
