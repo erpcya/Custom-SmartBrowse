@@ -2,13 +2,11 @@ package org.eevolution.form;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.Properties;
+
 
 import org.adempiere.model.MBrowseField;
 import org.compiere.model.GridField;
 import org.compiere.model.GridFieldVO;
-import org.compiere.model.MLookupFactory;
-import org.compiere.model.MLookupInfo;
 
 public class BrowserRows {
 
