@@ -204,4 +204,43 @@ public class BrowserRows {
 	public int getDisplay_index(int display) {
 		return display_indexes.get(display);
 	}
+	
+	/**
+	 * Get Index on Browse
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 15/10/2013, 18:20:15
+	 * @param columnName
+	 * @param row
+	 * @return
+	 * @return int
+	 */
+	public int getIndex(String columnName,int row)
+	{
+		LinkedHashMap<Integer, Object> values = rows.get(row);
+		for (int i=1;i<values.size();i++)
+			if (columnName.equals(((GridField)values.get(i)).getColumnName() ))
+				return i;
+		
+		return -1;
+	}
+	
+	/**
+	 * Get Index on Table
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 15/10/2013, 18:20:15
+	 * @param columnName
+	 * @param row
+	 * @return
+	 * @return int
+	 */
+	public int getDisplayIndex(String columnName,int row)
+	{
+		LinkedHashMap<Integer, Object> values = rows.get(row);
+		for (int i=1;i<values.size();i++){
+			GridField gField = (GridField)values.get(i);
+			
+			if (gField.isDisplayed())
+				if(columnName.equals(gField.getColumnName()))
+					return getIndex_display(i);
+		}
+		return -1;
+	}
 }
