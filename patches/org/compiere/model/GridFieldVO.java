@@ -282,8 +282,18 @@ public class GridFieldVO implements Serializable
 		voT.IsMandatory = voF.IsMandatory;
 		voT.FieldLength = voF.FieldLength;
 		voT.DisplayLength = voF.FieldLength;
-		voT.DefaultValue = voF.DefaultValue;
-		voT.DefaultValue2 = voF.DefaultValue2;
+		/*
+		 * Dixon Martinez
+		 * Modification of the class to solve copying the default values ​​of
+		 * the parameters in reports
+		 */
+		//voT.DefaultValue = voF.DefaultValue;
+		//voT.DefaultValue2 = voF.DefaultValue2;
+		
+		voT.DefaultValue = voF.DefaultValue2;	
+		/*
+		 * End Dixon Martinez
+		 */
 		voT.VFormat = voF.VFormat;
 		voT.ValueMin = voF.ValueMin;
 		voT.ValueMax = voF.ValueMax;
