@@ -852,13 +852,19 @@ public class VBrowser extends Browser implements ActionListener,
 	}
 
 	private void bSearchActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_bSearchActionPerformed
-		bZoom.setEnabled(true);
-		bSelectAll.setEnabled(true);
-		bExport.setEnabled(true);
-		bDelete.setEnabled(true);
-		p_loadedOK = initBrowser();
-		collapsibleSeach.setCollapsed(true);
-		executeQuery();
+		/**
+		 *  @author Carlos Parada 
+		 *  Evaluate Mandatory for filter
+		 */
+		if (evaluateMandatoryFilter(m_frame)){
+			bZoom.setEnabled(true);
+			bSelectAll.setEnabled(true);
+			bExport.setEnabled(true);
+			bDelete.setEnabled(true);
+			p_loadedOK = initBrowser();
+			collapsibleSeach.setCollapsed(true);
+			executeQuery();
+		}
 	}// GEN-LAST:event_bSearchActionPerformed
 
 	private void bFindActionPerformed(java.awt.event.ActionEvent evt) {
@@ -909,7 +915,7 @@ public class VBrowser extends Browser implements ActionListener,
 	/** The GlassPane           	*/
 	private AGlassPane  m_glassPane = new AGlassPane();
 	private CollapsiblePanel collapsibleSeach;
-	private VBrowserSearch  searchPanel;
+	
 
 	// End of variables declaration//GEN-END:variables
 
@@ -1113,48 +1119,4 @@ public class VBrowser extends Browser implements ActionListener,
 				return null;
 	}
 	
-	public String getSQLWhere(boolean refresh) {
-		
-		if(!refresh)
-			return m_whereClause;
-		
-		m_parameters_values = new ArrayList<Object>();
-		m_parameters = new ArrayList<Object>();
-
-		boolean onRange = false;
-		StringBuilder sql = new StringBuilder(p_whereClause);
-
-		for (Entry<Object, Object> entry : searchPanel.getParamenters().entrySet()) {
-			VEditor editor = (VEditor) entry.getValue();
-			GridFieldVO field = editor.getField().getVO();
-			if (!onRange) {
-
-				if (editor.getValue() != null
-						&& !editor.getValue().toString().isEmpty()
-						&& !field.isRange) {
-					sql.append(" AND ");
-					sql.append(field.Help).append("=? ");
-					m_parameters.add(field.Help);
-					m_parameters_values.add(editor.getValue());
-				} else if (editor.getValue() != null
-						&& !editor.getValue().toString().isEmpty()
-						&& field.isRange) {
-					sql.append(" AND ");
-					sql.append(field.Help).append(" BETWEEN ?");
-					m_parameters.add(field.Help);
-					m_parameters_values.add(editor.getValue());
-					onRange = true;
-				} else
-					continue;
-			} else if (editor.getValue() != null
-					&& !editor.getValue().toString().isEmpty()) {
-				sql.append(" AND ? ");
-				m_parameters.add(field.Help);
-				m_parameters_values.add(editor.getValue());
-				onRange = false;
-			}
-		}
-		m_whereClause = sql.toString();
-		return sql.toString();
-	}	
 }

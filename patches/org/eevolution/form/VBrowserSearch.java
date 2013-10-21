@@ -212,7 +212,7 @@ public class VBrowserSearch extends CPanel implements
 		if (evt.getSource() instanceof VEditor) {
 			GridField changedField = ((VEditor) evt.getSource()).getField();
 			if (changedField != null) {
-				processDependencies (changedField);
+				//processDependencies (changedField);
 				// future processCallout (changedField);
 			}
 		}
@@ -220,7 +220,8 @@ public class VBrowserSearch extends CPanel implements
 		if(evt.getSource() instanceof VEditor)
 		{
 			VEditor vEditor = (VEditor)evt.getSource();
-			columnName = vEditor.getField().getVO().Help;
+			//Change For Column Name Carlos Parada
+			columnName = vEditor.getField().getVO().ColumnName;
 		}
 		processNewValue(evt.getNewValue(), columnName);
 	}	//	vetoableChange
@@ -251,11 +252,12 @@ public class VBrowserSearch extends CPanel implements
 
 	
 	
+	//Comment Process Dependencies Carlos Parada
 	/**
 	 *  Evaluate Dependencies
 	 *  @param changedField changed field
 	 */
-	private void processDependencies (GridField changedField)
+	/*private void processDependencies (GridField changedField)
 	{
 		String columnName = changedField.getVO().Help;;
 
@@ -286,7 +288,7 @@ public class VBrowserSearch extends CPanel implements
 			}
 		}
 	}
-	
+	*/
 	private void processNewValue(Object value, String name) {
 		if (value == null)
 			value = new String("");
@@ -323,7 +325,8 @@ public class VBrowserSearch extends CPanel implements
 			if(comp instanceof VEditor)
 			{			
 				VEditor vEditor = (VEditor) comp;
-				columnName = vEditor.getField().getVO().Help;
+				//Change For Column Name Carlos Parada
+				columnName = vEditor.getField().getVO().ColumnName;
 				//columnName = comp.getName();
 			}
 			else columnName =  comp.getName();
@@ -395,18 +398,19 @@ public class VBrowserSearch extends CPanel implements
 	 * @see org.compiere.model.GridField#restoreValue()
 	 */
 	protected void cleanContext() {
+		//Change Help For ColumnName
 		for (GridField f : m_mFields) {
 			if (f != null)
 			{	
 				f.restoreValue();
-				Env.setContext(f.getVO().ctx, p_WindowNo, f.getVO().Help, "");
+				Env.setContext(f.getVO().ctx, p_WindowNo, f.getVO().ColumnName, "");
 			}	
 		}
 		for (GridField f : m_mFields2) {
 			if (f != null)
 			{				
 				f.restoreValue();
-				Env.setContext(f.getVO().ctx, p_WindowNo, f.getVO().Help, "");
+				Env.setContext(f.getVO().ctx, p_WindowNo, f.getVO().ColumnName, "");
 			}	
 		}
 	}
