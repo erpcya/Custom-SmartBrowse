@@ -20,10 +20,21 @@ public class BrowserRows {
 	private LinkedHashMap<Integer, Integer> display_indexes =new LinkedHashMap<Integer, Integer>(); 
 	private LinkedHashMap<Integer, Integer> indexes_display =new LinkedHashMap<Integer, Integer>();
 	
-	
+	/**
+	 * 
+	 * *** Build Of Class ***
+	 */
 	public BrowserRows() {
 	}
 	
+	/**
+	 * Get GridFieldVO From Column
+	 * @param windowNo
+	 * @param title
+	 * @param col
+	 * @return
+	 * @return GridFieldVO
+	 */
 	public GridFieldVO getGridFieldVO(int windowNo,String title,int col)
 	{
 		MBrowseField field  = getBrowseField(col);
@@ -79,23 +90,47 @@ public class BrowserRows {
 		return voBase;
 	}
 	
+	/**
+	 * Add Column
+	 * @param col
+	 * @param field
+	 * @return void
+	 */
 	public void addBrowseField(int col , MBrowseField field)
 	{
+		/**
+		 * Carlos Parada Add Indexes to LinkedHasMap
+		 */
 		
 		if (field.isDisplayed()){
 			indexes_display.put(col,viewColumns);
 			display_indexes.put(viewColumns,col);
 			viewColumns++;
 		}
+		/**
+		 * End Carlos Parada
+		 */
 		
 		browser_head.put(col, field);
 	}
-
+	
+	/**
+	 * Get BrowseField Column
+	 * @param col
+	 * @return
+	 * @return MBrowseField
+	 */
 	public MBrowseField getBrowseField (int col)
 	{
 		return browser_head.get(col);
 	}
 	
+	/**
+	 * Set Row
+	 * @param id
+	 * @param row
+	 * @return void
+	 */
 	public void setRow (int id  , ArrayList<Object> row)
 	{
 		LinkedHashMap<Integer, Object> values = rows.get(id);
@@ -108,6 +143,13 @@ public class BrowserRows {
 		rows.put(id, values);
 	}
 	
+	/**
+	 * Set Value to Browse Rows
+	 * @param row
+	 * @param col
+	 * @param value
+	 * @return void
+	 */
 	public void setValue(int row , int col, Object value)
 	{
 		this.column = col;
@@ -121,6 +163,13 @@ public class BrowserRows {
 		rows.put(row , values);
 	}
 	
+	/**
+	 * Get Value From BrowseRows
+	 * @param id
+	 * @param col
+	 * @return
+	 * @return Object
+	 */
 	public Object getValue(int id , int col)
 	{
 		if (rows.size() > id)
@@ -132,7 +181,7 @@ public class BrowserRows {
 	}
 	
 	/**
-	 * 
+	 * Heads
 	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 02/09/2013, 07:02:36
 	 * @return
 	 * @return LinkedHashMap<Integer,MBrowseField>
@@ -142,7 +191,7 @@ public class BrowserRows {
 	}
 	
 	/**
-	 * 
+	 * Rows
 	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 02/09/2013, 07:02:18
 	 * @return
 	 * @return LinkedHashMap<Integer,LinkedHashMap<Integer,Object>>
@@ -152,7 +201,7 @@ public class BrowserRows {
 	}
 	
 	/**
-	 * 
+	 * Qty Rows
 	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 02/09/2013, 07:02:22
 	 * @return
 	 * @return int
@@ -163,7 +212,7 @@ public class BrowserRows {
 	}
 	
 	/**
-	 * 
+	 * Clear Rows
 	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 02/09/2013, 07:02:27
 	 * @return void
 	 */
@@ -199,7 +248,14 @@ public class BrowserRows {
 		return indexes_display.get(index);
 	}
 	
-	public int getDisplay_index(int display) {
+	/**
+	 * Get Column Index From Browse Fields 
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 21/10/2013, 11:53:52
+	 * @param display
+	 * @return
+	 * @return int
+	 */
+	public int getTableIndex(int display) {
 		return display_indexes.get(display);
 	}
 	

@@ -40,17 +40,8 @@ import org.compiere.model.GridField;
 import org.compiere.util.CLogger;
 
 /**
- *  Cell Editor.
- *  <pre>
- *		Sequence of events:
- *			isCellEditable
- *			getTableCellEditor
- *			shouldSelectCell
- *			getCellEditorValue
- *  </pre>
- *  A new Editor is created for editable columns.
- *  @author 	Jorg Janke
- *  @version 	$Id: VCellEditor.java,v 1.2 2006/07/30 00:51:28 jjanke Exp $
+ *  VCellEditor Copy for Support Smart Browse Fields.
+ *  Carlos Parada
  */
 public final class VBrowseCellEditor extends AbstractCellEditor
 	implements TableCellEditor, VetoableChangeListener, ActionListener

@@ -26,9 +26,7 @@ public interface IBrowseTable
 	public void addColumn (String header);
 	
 	public void setColumnClass (int index, GridField gField,int displayType, boolean readOnly, String header);
-	
-
-	
+		
 	public Integer getSelectedRowKey();
 	
 	public int getSelectedRow();
