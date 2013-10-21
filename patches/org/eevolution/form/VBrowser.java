@@ -32,7 +32,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.logging.Level;
 
@@ -63,7 +62,6 @@ import org.compiere.grid.ed.VEditor;
 import org.compiere.minigrid.IDColumn;
 import org.compiere.browsegrid.BrowseTable;
 import org.compiere.model.GridField;
-import org.compiere.model.GridFieldVO;
 import org.compiere.model.MPInstance;
 import org.compiere.model.MProcess;
 import org.compiere.model.MQuery;

@@ -21,9 +21,12 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
+import java.util.Vector;
 import java.util.logging.Level;
 
 import javax.script.ScriptEngine;
@@ -47,36 +50,16 @@ import org.compiere.swing.CTable;
 import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
+import org.compiere.util.MSort;
 import org.compiere.util.Util;
 import org.eevolution.form.BrowserCallout;
 import org.eevolution.form.BrowserRows;
 import org.eevolution.form.VBrowser;
 
 /**
- *  Mini Table.
- *  Default Read Only Table for Boolean, String, Number, Timestamp values
- *  <p>
- *  After initializing the Table Model, you need to call setColumnClass,
- *  add columns via addColumn or in one go prepare the table.
- *  <code>
- *  MiniTable mt = new MiniTable();
- *  String sql = mt.prepareTable(..);   //  table defined
- *  //  add where to the sql statement
- *  ResultSet rs = ..
- *  mt.loadTable(rs);
- *  rs.close();
- *  </code>
- *  @author     Jorg Janke
- *  @version    $Id: MiniTable.java,v 1.3 2006/07/30 00:51:28 jjanke Exp $
- * 
- * @author Teo Sarca, SC ARHIPAC SERVICE SRL
- * 				<li>BF [ 1891082 ] NPE on MiniTable when you hide some columns
- * 				<li>FR [ 1974299 ] Add MiniTable.getSelectedKeys method
- * 				<li>FR [ 2847295 ] MiniTable multiselection checkboxes not working
- * 					https://sourceforge.net/tracker/?func=detail&atid=879335&aid=2847295&group_id=176962
- * @author Teo Sarca, teo.sarca@gmail.com
- * 				<li>BF [ 2876895 ] MiniTable.loadTable: NPE if column is null
- * 					https://sourceforge.net/tracker/?func=detail&aid=2876895&group_id=176962&atid=879332
+ *  @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 
+ *  Browse Table
+ *  Extends CTable, Methods Copy from Minitable implements VLookup Objects for grid
  */
 public class BrowseTable extends CTable implements IBrowseTable
 {
@@ -597,7 +580,7 @@ public class BrowseTable extends CTable implements IBrowseTable
 				for (int col = 0; col < this.data.getViewColumns(); col++){
 					Object data = getModel().getValueAt(row, col);
 					//Class<?> c = layout[col].getColClass();
-					int ReferenceType = this.data.getBrowseField(this.data.getDisplay_index(col)).getAD_Reference_ID();
+					int ReferenceType = this.data.getBrowseField(this.data.getTableIndex(col)).getAD_Reference_ID();
 					//if (c == BigDecimal.class)
 					if(ReferenceType == DisplayType.Amount){	
 						BigDecimal subtotal = Env.ZERO;
@@ -621,7 +604,7 @@ public class BrowseTable extends CTable implements IBrowseTable
 		for (int col = 0; col < this.data.getViewColumns(); col++)
 		{
 			//Class<?> c = layout[col].getColClass();
-			MBrowseField bField = this.data.getBrowseField(this.data.getDisplay_index(col));
+			MBrowseField bField = this.data.getBrowseField(this.data.getTableIndex(col));
 			if(bField.getAD_Reference_ID() == DisplayType.Amount)	
 				setValueAt(total[col] , row - 1, col);
 			else{	
@@ -677,6 +660,15 @@ public class BrowseTable extends CTable implements IBrowseTable
 		
 	}
 	
+	/**
+	 * Set Value On Table And BrowseRows
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 21/10/2013, 12:00:51
+	 * @param gField
+	 * @param aValue
+	 * @param row
+	 * @param column
+	 * @return void
+	 */
 	public void setValueAt(GridField gField,Object aValue, int row, int column) {
 		// TODO Auto-generated method stub
 		
@@ -685,21 +677,28 @@ public class BrowseTable extends CTable implements IBrowseTable
 		
 		GridField gf = new GridField(gField.getVO());
 		gf.setValue(aValue, false);
-		data.setValue(row, data.getDisplay_index(column), gf);
+		data.setValue(row, data.getTableIndex(column), gf);
 		
 		if (gField.isDisplayed())
 			super.setValueAt(aValue, row, column);
-	}
+	}//setValueAt
 
+	/**
+	 * Set Key index From Table
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 21/10/2013, 11:59:42
+	 * @param col
+	 * @return void
+	 */
 	private void setKey(int col)
 	{
 		p_keyColumnIndex = col;
 		vbrowse.m_keyColumnIndex=col;
-	}
+	}//setKey
 	
 	/**************************************************************************
+	 *  Carlos Parada
 	 *  Adapted for Browse Callouts
-	 *  Process Callout(s).
+	 *  Process Callout(s) Adapted.
 	 *  <p>
 	 *  The Callout is in the string of
 	 *  "class.method;class.method;"
@@ -834,4 +833,15 @@ public class BrowseTable extends CTable implements IBrowseTable
 		}   //  for each callout
 		return "";
 	}	//	processCallout
+	
+	/**
+	 *  Stop Sort will write After
+	 *  Sort Table
+	 *  @param modelColumnIndex model column sort index
+	 */
+	@Override
+	protected void sort (final int modelColumnIndex)
+	{
+		sorting = false;
+	}   //  sort
 }   //  BrowseTable
