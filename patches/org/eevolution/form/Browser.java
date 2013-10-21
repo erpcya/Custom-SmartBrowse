@@ -39,8 +39,11 @@ import org.adempiere.model.MBrowse;
 import org.adempiere.model.MBrowseField;
 import org.adempiere.model.MView;
 import org.adempiere.model.MViewColumn;
+import org.compiere.apps.ADialog;
 import org.compiere.apps.search.Info_Column;
+import org.compiere.grid.ed.VEditor;
 import org.compiere.minigrid.IDColumn;
+import org.compiere.model.GridFieldVO;
 import org.compiere.model.MColumn;
 import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
@@ -50,6 +53,7 @@ import org.compiere.model.MRole;
 import org.compiere.model.MTable;
 import org.compiere.model.Query;
 import org.compiere.process.ProcessInfo;
+import org.compiere.swing.CFrame;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.DisplayType;
@@ -190,7 +194,10 @@ public abstract class Browser {
 	/** Export rows **/
 	private ArrayList<ArrayList<Object>> m_rows = new ArrayList<ArrayList<Object>>();
 
-
+	/** Carlos Parada Move BrowseSearch to VBrowser
+	 */
+	protected VBrowserSearch  searchPanel;
+	
 	public Browser(boolean modal, int WindowNo, String value, MBrowse browse,
 			String keyColumn, boolean multiSelection, String where) {
 		m_Browse = browse;
@@ -494,7 +501,8 @@ public abstract class Browser {
 	 */
 	 public abstract Object getParamenterValue(Object key);
 	 
-	 abstract public String  getSQLWhere(boolean refresh);
+	 //Not Abstract Method Carlos Parada
+	 //abstract public String  getSQLWhere(boolean refresh);
 	
 	protected String getSQL() {
 		String dynWhere = getSQLWhere(false);
@@ -751,4 +759,133 @@ public abstract class Browser {
 			m_pstmt = null;
 		}
 	} // Exporter
+	
+	/**
+	 * Evaluate Mandatory for Filter 
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 20/10/2013, 22:29:37
+	 * @return
+	 * @return boolean
+	 */
+	public boolean evaluateMandatoryFilter(CFrame m_frame)
+	{
+		Object value_from=null;
+		boolean onRange = false;
+		boolean result =true;
+		
+		for (Entry<Object, Object> entry : searchPanel.getParamenters().entrySet()) {
+			VEditor editor = (VEditor) entry.getValue();
+			GridFieldVO field = editor.getField().getVO();
+			if (!onRange) {
+
+				if ((editor.getValue() == null
+						|| (editor.getValue() != null && editor.getValue().toString().isEmpty()))
+						&& !field.isRange
+						&& editor.isMandatory()) {
+					ADialog.error(p_WindowNo, m_frame.getContentPane(), "FillMandatory", Msg.translate(Env.getCtx(),field.ColumnName));
+					return false;
+				} else if (editor.getValue() != null
+						&& !editor.getValue().toString().isEmpty()
+						&& field.isRange
+						&& editor.isMandatory()) {
+					onRange = true;
+					value_from =editor.getValue(); 
+				}else if (editor.getValue() == null
+						&& field.isRange
+						&& editor.isMandatory()) {
+					onRange = true;
+					value_from = null;
+				}
+				else
+					continue;
+			} else if ((editor.getValue() == null
+					|| (editor.getValue() != null && editor.getValue().toString().isEmpty()))
+					&& editor.isMandatory()) {
+				if (value_from!=null){
+					value_from=null;
+					onRange = false;
+				}
+				else
+				{
+					ADialog.error(p_WindowNo, m_frame.getContentPane(), "FillMandatory", Msg.translate(Env.getCtx(),field.ColumnName));
+					return false;
+				}
+			}
+			else{
+				onRange = false;
+				value_from=null;
+			}
+			
+		}
+
+		return result;
+	}
+	
+	public String getSQLWhere(boolean refresh) {
+	
+		if(!refresh)
+			return m_whereClause;
+		
+		m_parameters_values = new ArrayList<Object>();
+		m_parameters = new ArrayList<Object>();
+	
+		boolean onRange = false;
+		StringBuilder sql = new StringBuilder(p_whereClause);
+	
+		for (Entry<Object, Object> entry : searchPanel.getParamenters().entrySet()) {
+			VEditor editor = (VEditor) entry.getValue();
+			GridFieldVO field = editor.getField().getVO();
+			if (!onRange) {
+	
+				if (editor.getValue() != null
+						&& !editor.getValue().toString().isEmpty()
+						&& !field.isRange) {
+					sql.append(" AND ");
+					sql.append(field.Help).append("=? ");
+					m_parameters.add(field.Help);
+					m_parameters_values.add(editor.getValue());
+				} else if (editor.getValue() != null
+						&& !editor.getValue().toString().isEmpty()
+						&& field.isRange) {
+					sql.append(" AND ");
+					/**
+					 * @author Carlos Parada
+					 * @date 18/02/2013 
+					 * Replacing between by >= for resolving bugs in filter
+					 */
+					//sql.append(field.Help).append(" BETWEEN ?");
+					sql.append(field.Help).append(" >= ? ");
+					m_parameters.add(field.Help);
+					m_parameters_values.add(editor.getValue());
+					onRange = true;
+				/**
+				 * @author Carlos Parada
+				 * @date 18/02/2013 
+				 * Adding Condition when value is null and is range for resolving bugs in filter
+				 */
+				}else if (editor.getValue() == null
+						&& field.isRange) {
+						onRange = true;
+				}
+				else
+					continue;
+			} else if (editor.getValue() != null
+					&& !editor.getValue().toString().isEmpty()) {
+				/**
+				 * @author Carlos Parada
+				 * @date 18/02/2013 
+				 * Replacing between by >= for resolving bugs in filter
+				 */
+				//sql.append(" AND ? ");
+				sql.append(" AND ").append(field.Help).append(" <= ? ");
+				m_parameters.add(field.Help);
+				m_parameters_values.add(editor.getValue());
+				onRange = false;
+			}
+			else
+				onRange = false;
+		
+	}
+	m_whereClause = sql.toString();
+	return sql.toString();
+}
 }
