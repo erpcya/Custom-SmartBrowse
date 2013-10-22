@@ -186,7 +186,8 @@ public class WBrowserSearch extends  Grid implements ValueChangeListener {
 		if (evt.getSource() instanceof WEditor) {
 			GridField changedField = ((WEditor) evt.getSource()).getGridField();
 			if (changedField != null) {
-				processDependencies(changedField);
+				//Carlos Parada Comment Process Dependencies for Support Context
+				//processDependencies(changedField);
 				// future processCallout (changedField);
 			}
 		}
@@ -194,7 +195,8 @@ public class WBrowserSearch extends  Grid implements ValueChangeListener {
 		if(evt.getSource() instanceof WEditor)
 		{
 			WEditor wEditor = (WEditor)evt.getSource();
-			columnName = wEditor.getGridField().getVO().Help;
+			/** Carlos Parada Change Help for ColumnName for Support Context*/
+			columnName = wEditor.getGridField().getVO().ColumnName;
 		}
 		processNewValue(evt.getNewValue(), columnName);
 	} // valueChange
@@ -223,11 +225,13 @@ public class WBrowserSearch extends  Grid implements ValueChangeListener {
 			return null;
 	}
 	
+	
+	//Carlos Parada Comment for Support Context
 	/**
 	 * Evaluate Dependencies
 	 * @param changedField changed field
 	 */
-	private void processDependencies(GridField changedField) 
+	/*private void processDependencies(GridField changedField) 
 	{
 		
 		String columnName = changedField.getVO().Help;;
@@ -258,7 +262,7 @@ public class WBrowserSearch extends  Grid implements ValueChangeListener {
 				}
 			}
 		}
-	}
+	}*/
 
 	private void processNewValue(Object value, String name) {
 		if (value == null)
@@ -336,14 +340,16 @@ public class WBrowserSearch extends  Grid implements ValueChangeListener {
 			if (f != null)
 			{	
 				f.restoreValue();
-				Env.setContext(f.getVO().ctx, p_WindowNo, f.getVO().Help, "");
+				/** Carlos Parada Change Help for ColumnName for Support Context*/
+				Env.setContext(f.getVO().ctx, p_WindowNo, f.getVO().ColumnName, "");
 			}	
 		}
 		for (GridField f : m_mFields2) {
 			if (f != null)
 			{				
 				f.restoreValue();
-				Env.setContext(f.getVO().ctx, p_WindowNo, f.getVO().Help, "");
+				/** Carlos Parada Change Help for ColumnName for Support Context*/
+				Env.setContext(f.getVO().ctx, p_WindowNo, f.getVO().ColumnName, "");
 			}	
 		}
 	}
