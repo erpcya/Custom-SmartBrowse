@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 
 
 import org.adempiere.model.MBrowseField;
+import org.compiere.browsegrid.BrowseTable;
 import org.compiere.model.GridField;
 import org.compiere.model.GridFieldVO;
 
@@ -19,12 +20,24 @@ public class BrowserRows {
 	private LinkedHashMap<Integer, MBrowseField> browser_head = new LinkedHashMap<Integer, MBrowseField>();
 	private LinkedHashMap<Integer, Integer> display_indexes =new LinkedHashMap<Integer, Integer>(); 
 	private LinkedHashMap<Integer, Integer> indexes_display =new LinkedHashMap<Integer, Integer>();
+	private BrowseTable table; 
 	
 	/**
 	 * 
 	 * *** Build Of Class ***
 	 */
 	public BrowserRows() {
+	}
+	
+	/**
+	 * Build With table
+	 * *** Build Of Class ***
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 21/10/2013, 16:05:28
+	 * @param table
+	 */
+	public BrowserRows(BrowseTable table)
+	{
+		this.table=table;
 	}
 	
 	/**
@@ -243,7 +256,14 @@ public class BrowserRows {
 		return viewColumns;
 	}
 
-	public int getIndex_display(int index) {
+	/**
+	 * get Column Index From Table
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 21/10/2013, 16:07:43
+	 * @param index
+	 * @return
+	 * @return int
+	 */
+	public int getDisplayIndex(int index) {
 		
 		return indexes_display.get(index);
 	}
@@ -260,41 +280,84 @@ public class BrowserRows {
 	}
 	
 	/**
-	 * Get Index on Browse
-	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 15/10/2013, 18:20:15
-	 * @param columnName
-	 * @param row
-	 * @return
-	 * @return int
+	 * set Table
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 21/10/2013, 16:06:07
+	 * @param table
+	 * @return void
 	 */
-	public int getIndex(String columnName,int row)
-	{
-		LinkedHashMap<Integer, Object> values = rows.get(row);
-		for (int i=1;i<values.size();i++)
-			if (columnName.equals(((GridField)values.get(i)).getColumnName() ))
-				return i;
-		
-		return -1;
+	public void setTable(BrowseTable table) {
+		this.table = table;
 	}
 	
 	/**
-	 * Get Index on Table
-	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 15/10/2013, 18:20:15
-	 * @param columnName
-	 * @param row
+	 * get Table 
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 21/10/2013, 16:12:57
+	 * @return
+	 * @return BrowseTable
+	 */
+	public BrowseTable getTable() {
+		return table;
+	}
+	
+	/**
+	 * Get Selected Row
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 21/10/2013, 16:13:11
 	 * @return
 	 * @return int
 	 */
-	public int getDisplayIndex(String columnName,int row)
+	public int getSelectedRow()
 	{
-		LinkedHashMap<Integer, Object> values = rows.get(row);
-		for (int i=1;i<values.size();i++){
-			GridField gField = (GridField)values.get(i);
-			
-			if (gField.isDisplayed())
-				if(columnName.equals(gField.getColumnName()))
-					return getIndex_display(i);
-		}
-		return -1;
+		if (table==null)
+			return -1;
+		else
+			return table.getSelectedRow();
 	}
+	
+	/**
+	 * Get Selected Row
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 21/10/2013, 16:13:11
+	 * @return
+	 * @return int
+	 */
+	public int getSelectedColumn()
+	{
+		if (table==null)
+			return -1;
+		else
+			return table.getSelectedColumn();
+	}
+	
+	/**
+	 * Get Value of Selected Cell
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 21/10/2013, 16:17:26
+	 * @return
+	 * @return Object
+	 */
+	public Object getValueofSelectedCell()
+	{
+		if (table!=null)
+			return getValue(getSelectedRow(), getTableIndex(getSelectedColumn()));
+		else
+			return null;
+	}
+	
+	/**
+	 * Set Value on Selected Cell
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 21/10/2013, 16:18:14
+	 * @param Value
+	 * @return void
+	 */
+	public void setValueofSelectedCell(Object Value)
+	{
+		
+		if (table!=null){
+			GridField gField=(GridField) getValue(getSelectedRow(), getTableIndex(getSelectedColumn()));
+			if (gField!=null){
+				table.setValueAt(gField, Value, getSelectedRow(), getSelectedColumn());
+			}
+		}
+	}
+	
+	//public Object getValue
+	
 }
