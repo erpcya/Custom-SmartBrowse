@@ -1026,7 +1026,7 @@ public class VBrowser extends Browser implements ActionListener,
 		login.batchLogin();
 
 		Properties m_ctx = Env.getCtx();
-		MBrowse browse = new MBrowse(m_ctx, 50024, null);
+		MBrowse browse = new MBrowse(m_ctx, 50025, null);
 		CFrame frame = new CFrame();
 		boolean modal = true;
 		int WindowNo = 0;

@@ -4,8 +4,12 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 
+
+
+import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.model.MBrowseField;
 import org.compiere.browsegrid.BrowseTable;
+import org.compiere.grid.tree.AdempiereTreeModel;
 import org.compiere.model.GridField;
 import org.compiere.model.GridFieldVO;
 
@@ -20,6 +24,7 @@ public class BrowserRows {
 	private LinkedHashMap<Integer, MBrowseField> browser_head = new LinkedHashMap<Integer, MBrowseField>();
 	private LinkedHashMap<Integer, Integer> display_indexes =new LinkedHashMap<Integer, Integer>(); 
 	private LinkedHashMap<Integer, Integer> indexes_display =new LinkedHashMap<Integer, Integer>();
+	private LinkedHashMap<String, Integer> columnnames_index =new LinkedHashMap<String, Integer>();
 	private BrowseTable table; 
 	
 	/**
@@ -120,6 +125,7 @@ public class BrowserRows {
 			display_indexes.put(viewColumns,col);
 			viewColumns++;
 		}
+		columnnames_index.put(field.getAD_View_Column().getAD_Column().getColumnName(), col);
 		/**
 		 * End Carlos Parada
 		 */
@@ -358,6 +364,53 @@ public class BrowserRows {
 		}
 	}
 	
-	//public Object getValue
+	/**
+	 * Get Object GridField from ColumnName 
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> Oct 22, 2013, 2:48:21 PM
+	 * @param ColumnName
+	 * @return
+	 * @return Object
+	 */
+	public Object getValueofColumn(String ColumnName)
+	{
+		if(table!=null)
+			return getValue(getSelectedRow(), columnnames_index.get(ColumnName));
+		else 
+			return null;
+	}
 	
+	/**
+	 * Get Object GridField from Column Index
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> Oct 22, 2013, 2:49:42 PM
+	 * @param col
+	 * @return
+	 * @return Object
+	 */
+	public Object getValueofColumn(int col)
+	{
+		if(table!=null)
+			return getValue(getSelectedRow(), col);
+		else 
+			return null;
+	}
+	
+	/**
+	 * Set Value of Column From ColumnName
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> Oct 22, 2013, 2:53:50 PM
+	 * @param ColumnName
+	 * @param Value
+	 * @return void
+	 */
+	public void setValueofColumn(String ColumnName,Object Value,int row)
+	{
+		if (table!=null){
+			if (columnnames_index.get(ColumnName)!=null){
+				GridField gField=(GridField) getValue(row, columnnames_index.get(ColumnName));
+				if (gField!=null){
+					table.setValueAt(gField, Value, row, getDisplayIndex(columnnames_index.get(ColumnName)));
+				}
+			}
+			
+		}
+	}
 }

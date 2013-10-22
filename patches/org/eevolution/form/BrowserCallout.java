@@ -46,7 +46,7 @@ public interface BrowserCallout
 	 *  @return Error message or ""
 	 */
 	public String start (Properties ctx, String method, int WindowNo,
-		BrowserRows mRow, GridField mField, Object value, Object oldValue);
+		BrowserRows mRow, GridField mField, Object value, Object oldValue, int currentRow, int currentColumn);
 
 	/**
 	 *	Conversion Rules.
