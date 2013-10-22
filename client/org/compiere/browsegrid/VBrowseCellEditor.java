@@ -208,7 +208,7 @@ public final class VBrowseCellEditor extends AbstractCellEditor
 			m_table.setValueAt(m_mField, e.getNewValue(), m_Row, m_Col);
 			if (m_mField.getCallout()!=null){
 				
-				m_table.processCallout(m_mField);
+				m_table.processCallout(m_mField,e.getNewValue(),e.getOldValue(),m_Row,m_Col);
 			}
 		}
 		//
