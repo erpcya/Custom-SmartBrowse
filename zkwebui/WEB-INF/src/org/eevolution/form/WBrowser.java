@@ -913,49 +913,4 @@ public class WBrowser extends Browser implements IFormController,
 			else
 				return null;
 	}
-	
-	public String getSQLWhere(boolean refresh) {
-		
-		if(!refresh)
-			return m_whereClause;
-		
-		m_parameters_values = new ArrayList<Object>();
-		m_parameters = new ArrayList<Object>();
-
-		boolean onRange = false;
-		StringBuilder sql = new StringBuilder(p_whereClause);
-
-		for (Entry<Object, Object> entry : searchGrid.getParamenters().entrySet()) {
-			WEditor editor = (WEditor) entry.getValue();
-			GridFieldVO field = editor.getGridField().getVO();
-			if (!onRange) {
-
-				if (editor.getValue() != null
-						&& !editor.getValue().toString().isEmpty()
-						&& !field.isRange) {
-					sql.append(" AND ");
-					sql.append(field.Help).append("=? ");
-					m_parameters.add(field.Help);
-					m_parameters_values.add(editor.getValue());
-				} else if (editor.getValue() != null
-						&& !editor.getValue().toString().isEmpty()
-						&& field.isRange) {
-					sql.append(" AND ");
-					sql.append(field.Help).append(" BETWEEN ?");
-					m_parameters.add(field.Help);
-					m_parameters_values.add(editor.getValue());
-					onRange = true;
-				} else
-					continue;
-			} else if (editor.getValue() != null
-					&& !editor.getValue().toString().isEmpty()) {
-				sql.append(" AND ? ");
-				m_parameters.add(field.Help);
-				m_parameters_values.add(editor.getValue());
-				onRange = false;
-			}
-		}
-		m_whereClause = sql.toString();
-		return sql.toString();
-	}
 }

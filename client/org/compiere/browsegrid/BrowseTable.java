@@ -103,7 +103,7 @@ public class BrowseTable extends CTable implements IBrowseTable
 	private boolean showTotals = false;
 	private boolean autoResize = true;
 	
-	protected BrowserRows data= new BrowserRows();
+	protected BrowserRows data= new BrowserRows(this);
 
 	protected VBrowser vbrowse; 
 	
@@ -712,15 +712,15 @@ public class BrowseTable extends CTable implements IBrowseTable
 	 * @return error message or ""
 	 * @see org.compiere.model.Callout
 	 */
-	public String processCallout (GridField field)
+	public String processCallout (GridField field,Object value,Object oldValue, int currentRow,int currentColumn )
 	{
 		String callout = field.getCallout();
 		if (callout.length() == 0)
 			return "";
 
 
-		Object value = field.getValue();
-		Object oldValue = field.getOldValue();
+		//Object value = field.getValue();
+		//Object oldValue = field.getOldValue();
 		log.fine(field.getColumnName() + "=" + value
 			+ " (" + callout + ") - old=" + oldValue);
 
@@ -764,6 +764,8 @@ public class BrowseTable extends CTable implements IBrowseTable
 				engine.put(MRule.ARGUMENTS_PREFIX + "Field", field);
 				engine.put(MRule.ARGUMENTS_PREFIX + "Value", value);
 				engine.put(MRule.ARGUMENTS_PREFIX + "OldValue", oldValue);
+				engine.put(MRule.ARGUMENTS_PREFIX + "currentRow", currentRow);
+				engine.put(MRule.ARGUMENTS_PREFIX + "currentColumn", currentColumn);
 				engine.put(MRule.ARGUMENTS_PREFIX + "Ctx", ctx);
 
 				try 
@@ -809,7 +811,7 @@ public class BrowseTable extends CTable implements IBrowseTable
 				{
 					activeCallouts.add(cmd);
 					activeCalloutInstance.add(call);
-					retValue = call.start(ctx, method, vbrowse.p_WindowNo, data, field, value, oldValue);
+					retValue = call.start(ctx, method, vbrowse.p_WindowNo, data, field, value, oldValue,currentRow,currentColumn);
 				}
 				catch (Exception e)
 				{

@@ -72,7 +72,7 @@ public class BrowserCalloutEngine extends CalloutEngine implements BrowserCallou
 	 *  @return Error message or ""
 	 */
 	public String start(Properties ctx, String methodName, int WindowNo,
-			BrowserRows mRow, GridField mField, Object value, Object oldValue) {
+			BrowserRows mRow, GridField mField, Object value, Object oldValue, int currentRow, int currentColumn) {
 		if (methodName == null || methodName.length() == 0)
 			throw new IllegalArgumentException("No Method Name");
 
@@ -94,19 +94,20 @@ public class BrowserCalloutEngine extends CalloutEngine implements BrowserCallou
 			throw new IllegalArgumentException("Method not found: "
 					+ methodName);
 		int argLength = method.getParameterTypes().length;
-		if (!(argLength == 5 || argLength == 6))
+		if (!(argLength == 8))
 			throw new IllegalArgumentException("Method " + methodName
 					+ " has invalid no of arguments: " + argLength);
 
 		// Call Method
 		try {
 			Object[] args = null;
-			if (argLength == 6)
+			if (argLength == 8)
 				args = new Object[] { ctx, new Integer(WindowNo), mRow, mField,
-						value, oldValue };
-			else
+						value, oldValue, currentRow,  currentColumn};
+			//Carlos Parada Comment to Send Current row And column
+			/*else
 				args = new Object[] { ctx, new Integer(WindowNo), mRow, mField,
-						value };
+						value };*/
 			retValue = (String) method.invoke(this, args);
 		} catch (Exception e) {
 			Throwable ex = e.getCause(); // InvocationTargetException

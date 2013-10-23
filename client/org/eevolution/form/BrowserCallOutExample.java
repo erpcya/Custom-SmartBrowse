@@ -16,6 +16,7 @@
  *****************************************************************************/
 package org.eevolution.form;
 
+import java.math.BigDecimal;
 import java.util.Properties;
 
 import org.compiere.model.GridField;
@@ -29,10 +30,15 @@ import org.compiere.util.CLogger;
 public class BrowserCallOutExample extends BrowserCalloutEngine {
 
 	
-	public String methodExample(Properties ctx,  int WindowNo,BrowserRows mRow, GridField mField, Object value, Object oldValue) 
+	public String methodExample(Properties ctx,  int WindowNo,BrowserRows mRow, GridField mField, Object value, Object oldValue,int current_Row, int current_Column) 
 	{
 		System.out.println("Hi! this is a example of implementation callouts");
-		System.out.println("This is a Value for GridField:"+value);
+		
+		System.out.println("This is a Value for :"+value);
+		System.out.println("This is a Old Value :"+oldValue);
+		System.out.println("This is a Value for GridField:"+mField.getValue());
+		System.out.println("This is a Old Value for GridField:"+mField.getOldValue());
+		mRow.setValueofColumn("SO_CreditUsed", new BigDecimal(9999.33),current_Row);
 		return "";
 	}
 	
