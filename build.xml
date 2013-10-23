@@ -1,0 +1,73 @@
+<project name="Smart Browse LVE" default="zkdist" basedir=".">
+    <description>
+        Building Smart Browse LVE-SmartBrowse.jar
+        Copy of Smart Browse eevolution
+        by
+        cparada@erpcya.com
+        http://www.erpcya.com
+    </description>
+  <!-- set global properties for this build -->
+  <property file="build.properties"/>
+  <import file="${adempiere.trunk}/utils_dev/properties.xml"/>
+  <property name="dist" value="${basedir}/dist"/>
+  <property name="base" value="${basedir}/base"/>
+  <property name="client" value="${basedir}/client"/>
+  <property name="zksrc" value="${basedir}/zkwebui/WEB-INF/src"/>
+  <property name="zkclasses" value="${dist}/zkclass/WEB-INF/classes"/>
+  <property name="class" value="${dist}/class"/>
+  <property name="zkjar" value="${dist}/zkclass"/>
+  
+  
+  <path id="compile.classpath">
+    <pathelement location="${adempiere.trunk}/zkwebui/WEB-INF/classes"/>
+    <fileset dir="${adempiere.trunk}/lib">
+      <include name="*.jar"/>
+    </fileset>
+    <fileset dir="${adempiere.trunk}/zkwebui/WEB-INF/lib">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+
+  <target name="init" depends="clean">
+    <echo message="Trunk location: ${adempiere.trunk}"/>
+    <echo message="ADempiere home: ${env.ADEMPIERE_HOME}"/>
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Create the classes directory structure used by compile -->
+    <mkdir dir="${dist}"/>
+    <mkdir dir="${zkjar}"/>
+    <mkdir dir="${zkjar}/WEB-INF"/>
+    <mkdir dir="${class}"/>
+    <mkdir dir="${zkclasses}"/>
+  </target>
+
+
+  <target name="zkcompile" depends="init"
+        description="compile the source " >
+    <!-- Compile the zk java code from ${src} into ${zkclasses} -->
+    <javac srcdir="${zksrc}" destdir="${zkclasses}">
+      <classpath refid="compile.classpath"/>
+    </javac>
+    <jar jarfile="${basedir}/zkpackages/LVE-SmartBrowse/lib/LVE-SmartBrowse.jar" basedir="${zkjar}"/>
+  </target>
+
+  <target name="compile" depends="init"
+        description="compile the source " >
+    <!-- Compile the zk java code from ${src} into ${zkclasses} -->
+    <javac srcdir="${base}" destdir="${class}">
+      <classpath refid="compile.classpath"/>
+    </javac>
+    
+    <javac srcdir="${client}" destdir="${class}">
+      <classpath refid="compile.classpath"/>
+    </javac>
+    
+    <jar jarfile="${basedir}/packages/LVE-SmartBrowse/lib/LVE-SmartBrowse.jar" basedir="${class}"/>
+  </target>
+  
+  <target name="clean"
+        description="clean up" >
+    <!-- Delete the ${build}, ${dist} and ${zkclasses} directory trees -->
+    <delete dir="${zkclasses}"/>
+  </target>
+</project>
