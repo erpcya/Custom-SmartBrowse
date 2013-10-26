@@ -364,20 +364,6 @@ public class BrowserRows {
 		}
 	}
 	
-	/**
-	 * Get Object GridField from ColumnName 
-	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> Oct 22, 2013, 2:48:21 PM
-	 * @param ColumnName
-	 * @return
-	 * @return Object
-	 */
-	public Object getValueofColumn(String ColumnName)
-	{
-		if(table!=null)
-			return getValue(getSelectedRow(), columnnames_index.get(ColumnName));
-		else 
-			return null;
-	}
 	
 	/**
 	 * Get Object GridField from Column Index
@@ -413,4 +399,23 @@ public class BrowserRows {
 			
 		}
 	}
+	
+	/**
+	 * Get Object GridField from ColumnName 
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> Oct 22, 2013, 2:48:21 PM
+	 * @param ColumnName
+	 * @return
+	 * @return Object
+	 */
+	public Object getValueofColumn(String ColumnName,int row)
+	{
+		int index; 
+		if(table!=null){
+			index =(columnnames_index.get(ColumnName)==null?-1:columnnames_index.get(ColumnName));
+			if (index>=0)
+				return getValue(row, index);
+		}	
+		return null;
+	}
+	
 }
