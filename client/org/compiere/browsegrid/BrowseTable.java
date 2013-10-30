@@ -646,8 +646,10 @@ public class BrowseTable extends CTable implements IBrowseTable
 		if (gField==null)
 		{
 			gField=data.getBrowseField(index).getgField();
-			gField.setValue(aValue, false);
-			data.setValue(row, index, gField);
+			GridField gf = new GridField(gField.getVO());
+			gf.setValue(aValue, false);
+			gf.setValue(aValue, false);
+			data.setValue(row, index, gf);
 		}
 		else
 		{

@@ -417,5 +417,13 @@ public class BrowserRows {
 		}	
 		return null;
 	}
-	
+
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		StringBuffer result = new StringBuffer(); 
+		for (int i=0;i<rows.size();i++)
+			result.append(rows.get(i) + "\n");
+		return result.toString();
+	}
 }
