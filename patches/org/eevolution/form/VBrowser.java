@@ -963,7 +963,8 @@ public class VBrowser extends Browser implements ActionListener,
 								||m_generalLayout[col].getAD_Reference_ID()==DisplayType.PAttribute
 								||m_generalLayout[col].getAD_Reference_ID()==DisplayType.Account)	
 							value = m_rs.getInt(col+colOffset);
-						else if (m_generalLayout[col].getAD_Reference_ID()==DisplayType.Amount)
+						else if (m_generalLayout[col].getAD_Reference_ID()==DisplayType.Amount
+								||m_generalLayout[col].getAD_Reference_ID()==DisplayType.Number)
 							value = m_rs.getBigDecimal(col+colOffset);
 						else if (m_generalLayout[col].getAD_Reference_ID()==DisplayType.YesNo){
 							value = m_rs.getString(col+colOffset);
