@@ -965,6 +965,11 @@ public class VBrowser extends Browser implements ActionListener,
 							value = m_rs.getInt(col+colOffset);
 						else if (m_generalLayout[col].getAD_Reference_ID()==DisplayType.Amount)
 							value = m_rs.getBigDecimal(col+colOffset);
+						else if (m_generalLayout[col].getAD_Reference_ID()==DisplayType.YesNo){
+							value = m_rs.getString(col+colOffset);
+							if (value!=null)
+								value= value.equals("Y");
+						}
 						else
 							value = m_rs.getObject(col+colOffset);
 												// store
