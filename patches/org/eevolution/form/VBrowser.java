@@ -839,6 +839,8 @@ public class VBrowser extends Browser implements ActionListener,
 		}
 		m_frame.setCursor(Cursor.getDefaultCursor());
 		p_loadedOK = initBrowser();
+		//Carlos Parada Set Context From Fields
+		searchPanel.setContextfromFields();
 		collapsibleSeach.setCollapsed(false);
 	}
 

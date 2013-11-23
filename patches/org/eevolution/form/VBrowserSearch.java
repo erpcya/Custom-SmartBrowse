@@ -414,4 +414,21 @@ public class VBrowserSearch extends CPanel implements
 			}	
 		}
 	}
+	
+	/**
+	 * Set window context.
+	 * @author Carlos Parada Set Context from Fields
+	 */
+	protected void setContextfromFields() {
+		//Change Help For ColumnName
+		Component[] comps = getComponents();
+		for (int i = 0; i < comps.length; i++) {
+			Component comp = comps[i];
+			if(comp instanceof VEditor)
+			{			
+				VEditor vEditor = (VEditor) comp;
+				processNewValue(vEditor.getValue(), vEditor.getField().getVO().ColumnName);
+			}
+		}
+	}
 }
