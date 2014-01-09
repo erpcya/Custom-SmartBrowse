@@ -2501,8 +2501,8 @@ public class GridTable extends AbstractTableModel
 					|| ( columnName.equals("C_DocType_ID") && hasDocTypeTargetField )
 					|| ( columnName.equals("Line") 
 					// Carlos Parada Is Allow Copy
-					|| field.IsAllowCopy()
-					//
+					|| !field.IsAllowCopy()
+					//End Carlos Parada
 							)
 				)
 				{
