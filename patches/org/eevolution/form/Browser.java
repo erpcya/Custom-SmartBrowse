@@ -38,7 +38,6 @@ import org.adempiere.model.I_AD_View_Column;
 import org.adempiere.model.MBrowse;
 import org.adempiere.model.MBrowseField;
 import org.adempiere.model.MView;
-import org.adempiere.model.MViewColumn;
 import org.compiere.apps.ADialog;
 import org.compiere.apps.search.Info_Column;
 import org.compiere.grid.ed.VEditor;
@@ -58,7 +57,6 @@ import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
-import org.compiere.util.KeyNamePair;
 import org.compiere.util.Language;
 import org.compiere.util.Msg;
 
@@ -884,8 +882,8 @@ public abstract class Browser {
 			else
 				onRange = false;
 		
+		}
+		m_whereClause = sql.toString();
+		return sql.toString();
 	}
-	m_whereClause = sql.toString();
-	return sql.toString();
-}
 }

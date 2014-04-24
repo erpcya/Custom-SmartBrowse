@@ -18,14 +18,18 @@
 package org.adempiere.webui.component;
 
 import java.math.BigDecimal;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Properties;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
 
+import javax.script.ScriptEngine;
+
 import org.adempiere.model.MBrowseField;
+import org.adempiere.model.MViewColumn;
 import org.adempiere.webui.event.TableValueChangeEvent;
 import org.adempiere.webui.event.TableValueChangeListener;
 import org.adempiere.webui.event.WTableModelEvent;
@@ -34,15 +38,15 @@ import org.adempiere.webui.exception.ApplicationException;
 import org.compiere.browsegrid.IBrowseTable;
 import org.compiere.minigrid.ColumnInfo;
 import org.compiere.minigrid.IDColumn;
-import org.compiere.minigrid.IMiniTable;
-import org.compiere.minigrid.MiniTable;
 import org.compiere.model.GridField;
-import org.compiere.model.MRole;
-import org.compiere.model.PO;
+import org.compiere.model.MRule;
 import org.compiere.util.CLogger;
+import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
-import org.compiere.util.KeyNamePair;
 import org.compiere.util.Util;
+import org.eevolution.form.WBrowserCallout;
+import org.eevolution.form.WBrowser;
+import org.eevolution.form.WBrowserRows;
 import org.zkoss.zul.ListModel;
 
 /**
@@ -66,7 +70,7 @@ public class WBrowseListbox extends Listbox implements IBrowseTable, TableValueC
 	private static final long serialVersionUID = 8717707799347994189L;
 
 	/**	Logger. */
-	private static CLogger logger = CLogger.getCLogger(MiniTable.class);
+	private static CLogger logger = CLogger.getCLogger(WBrowseListbox.class);
 
 	/** Model Index of Key Column.   */
 	protected int m_keyColumnIndex = -1;
@@ -75,27 +79,51 @@ public class WBrowseListbox extends Listbox implements IBrowseTable, TableValueC
 	private ArrayList<Integer> m_readWriteColumn = new ArrayList<Integer>();
 	// TODO this duplicates other info held on columns. Needs rationalising.
 	/** Layout set in prepareTable and used in loadTable.    */
-	private ColumnInfo[] m_layout = null;
+	//private ColumnInfo[] m_layout = null;
 	/** column class types (e.g. Boolean) */
 	private ArrayList<Class> m_modelHeaderClass = new ArrayList<Class>();
 	/** Color Column Index of Model.     */
 	private int m_colorColumnIndex = -1;
 	/** Color Column compare data.       */
 	private Object m_colorDataCompare = Env.ZERO;
+	
+	
+	protected WBrowserRows data= new WBrowserRows(this);
 
+	protected WBrowser vbrowse; 
+	
+	/** Active BrowseCallOuts **/
+	private List<String> activeCallouts = new ArrayList<String>();
+	
+	/** Active BrowseCallOutsInstances **/
+	private List<WBrowserCallout> activeCalloutInstance = new ArrayList<WBrowserCallout>();
+	
+	/** Context **/
+	private Properties ctx =Env.getCtx();   
+	
+	/** Multi Selection mode (default false) */
+	private boolean     m_multiSelection = false;
+
+	/** List of Column Width    */
+	private ArrayList<Integer>   m_minWidth = new ArrayList<Integer>();
+	
+	private boolean showTotals = false;
+	
+	private ArrayList<GridField> gFields = new ArrayList<GridField>();
 	/**
 	 * Default constructor.
 	 *
 	 * Sets a row renderer and an empty model
 	 */
-	public WBrowseListbox()
+	public WBrowseListbox(WBrowser wbrowse)
 	{
 		super();
-		WListItemRenderer rowRenderer = new WListItemRenderer();
+		WBrowseListItemRenderer rowRenderer = new WBrowseListItemRenderer(this);
 	    rowRenderer.addTableValueChangeListener(this);
 
 		setItemRenderer(rowRenderer);
 		setModel(new ListModelTable());
+		this.vbrowse = wbrowse;
 	}
 
 	/**
@@ -106,11 +134,11 @@ public class WBrowseListbox extends Listbox implements IBrowseTable, TableValueC
 	 */
 	public void setData(ListModelTable model, List< ? extends String> columnNames)
 	{
-		WListItemRenderer rowRenderer = null;
+		WBrowseListItemRenderer rowRenderer = null;
 		if (columnNames != null && columnNames.size() > 0)
 		{
 	    	//	 instantiate our custom row renderer
-		    rowRenderer = new WListItemRenderer(columnNames);
+		    rowRenderer = new WBrowseListItemRenderer(this);
 
 	    	// add listener for listening to component changes
 	    	rowRenderer.addTableValueChangeListener(this);
@@ -169,9 +197,9 @@ public class WBrowseListbox extends Listbox implements IBrowseTable, TableValueC
 	    head = new ListHead();
 
 	    // render list head
-	    if (this.getItemRenderer() instanceof WListItemRenderer)
+	    if (this.getItemRenderer() instanceof WBrowseListItemRenderer)
 	    {
-	    	((WListItemRenderer)this.getItemRenderer()).renderListHead(head);
+	    	((WBrowseListItemRenderer)this.getItemRenderer()).renderListHead(head);
 	    }
 	    else
 	    {
@@ -207,7 +235,7 @@ public class WBrowseListbox extends Listbox implements IBrowseTable, TableValueC
 		{
 			return true;
 		}
-
+		
 		return false;
 	}   //  isCellEditable
 
@@ -257,9 +285,76 @@ public class WBrowseListbox extends Listbox implements IBrowseTable, TableValueC
 	 */
 	public void setValueAt(Object value, int row, int column)
 	{
-		getModel().setDataAt(value, row, convertColumnIndexToModel(column));
+		getModel().setDataAt(value, row, column);
 	}
+	 
+    
+    /**
+	 * Set Value with BrowseField
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 15/10/2013, 10:02:04
+	 * @param bField
+	 * @param aValue
+	 * @param row
+	 * @param column
+	 * @param index
+	 * @return void
+	 */
+	public void setValueAt(MBrowseField bField,Object aValue, int row, int column,int index) {
+		// TODO Auto-generated method stub
+		
+		
+		GridField gField=(GridField)data.getValue(row, index);
+		GridField gf = null;
+		
+		if (gField==null)
+		{
+			gField=data.getBrowseField(index).getgField();
+			gf = new GridField(gField.getVO());
+			gf.setValue(aValue, false);
+			data.setValue(row, index, gf);
+		}
+		else
+		{
+			gField.setValue(aValue, false);
+			data.setValue(row, index, gField);
+		}
 
+		if (gField.isDisplayed())
+			setValueAt((gField.getDisplayType()==DisplayType.Date ||
+						gField.getDisplayType()==DisplayType.DateTime ? 
+								new Date(((Timestamp)aValue).getTime()) : aValue)  	
+			, row, column);
+			
+			
+		
+	}
+	
+	/**
+	 * Set Value On Table And BrowseRows
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 21/10/2013, 12:00:51
+	 * @param gField
+	 * @param aValue
+	 * @param row
+	 * @param column
+	 * @return void
+	 */
+	public void setValueAt(GridField gField,Object aValue, int row, int column) {
+		// TODO Auto-generated method stub
+		
+		if (gField==null)
+			throw new UnsupportedOperationException("No GridField");
+		
+		GridField gf = new GridField(gField.getVO());
+		gf.setValue(aValue, false);
+		data.setValue(row, data.getTableIndex(column), gf);
+		
+		if (gField.isDisplayed())
+			setValueAt(
+					(gField.getDisplayType()==DisplayType.Date ||
+					gField.getDisplayType()==DisplayType.DateTime ? 
+							(Date)aValue : aValue)
+					, row, column);
+	}//setValueAt
     /**
      * Convert the index for a column from the display index to the
      * corresponding index in the underlying model.
@@ -317,6 +412,7 @@ public class WBrowseListbox extends Listbox implements IBrowseTable, TableValueC
 	 *  @param tableName 		table name
 	 *  @return SQL statement to use to get resultset to populate table
 	 */
+	/*
 	public String prepareTable(ColumnInfo[] layout,
 							String from,
 							String where,
@@ -325,7 +421,7 @@ public class WBrowseListbox extends Listbox implements IBrowseTable, TableValueC
 	{
 		return prepareTable(layout, from, where, multiSelection, tableName, true);
 	}   //  prepareTable
-
+	*/
     /**
      *  Prepare Table and return SQL required to get resultset to
      *  populate table
@@ -338,7 +434,7 @@ public class WBrowseListbox extends Listbox implements IBrowseTable, TableValueC
      * @param addAccessSQL      specifies whether to addAcessSQL
      * @return  SQL statement to use to get resultset to populate table
      */
-    public String prepareTable(ColumnInfo[] layout,
+    /*public String prepareTable(ColumnInfo[] layout,
             String from,
             String where,
             boolean multiSelection,
@@ -415,13 +511,83 @@ public class WBrowseListbox extends Listbox implements IBrowseTable, TableValueC
             return sql.toString();
         }
     }   // prepareTable
+    */
+	
+	/**************************************************************************
+	 *  Prepare Table and return Only Select SQL
+	 *
+	 *  @param layout    array of column info
+	 *  @param from      SQL FROM content
+	 *  @param where     SQL WHERE content
+	 *  @param multiSelection multiple selections
+	 *  @param tableName table name
+	 *  @return SQL
+	 */
+	public String prepareTable(MBrowseField[] bfield, boolean multiSelection)
+	{
+	
+	    MViewColumn vc =null;
+		m_multiSelection = multiSelection;
+		clearColumns();
+		int col = 0;
+		//
+		StringBuffer sql = new StringBuffer ("");
+		//  Add columns & sql
+		for (int i = 0; i < bfield.length; i++)
+		{
+			//  create sql
+			if (i > 0)
+				sql.append(", ");
+			
+			vc = bfield[i].getAD_View_Column();
+			
+			//Set Columns to Query
+			sql.append(vc.getColumnSQL())
+				.append(" ")
+				.append("AS")
+				.append(" ")
+				.append(vc.getColumnName());
+		
+			if (bfield[i].isKey())
+				setKey(col);
+				
+			
+			//Add Browse Field
+			data.addBrowseField(i, bfield[i]);
+			bfield[i].setgField(new GridField(data.getGridFieldVO(vbrowse.p_WindowNo, bfield[i].getName(), i)));
+			//  add to model			
+			if (bfield[i].isDisplayed()){
+				gFields.add(bfield[i].getgField());
+				addColumn(bfield[i].getName());				
+				col++;
+			}
+		}//Add columns & sql
+		
+		col=0;
+		for (int i = 0; i < bfield.length; i++)
+		{
+		//Set Columns Class
+			if (bfield[i].isDisplayed()){
+				setColumnClass(col,
+					bfield[i].getgField(),
+					bfield[i].getAD_Reference_ID(),
+					bfield[i].isReadOnly(), 
+					bfield[i].getName());
+				col++;
+			}
+		}//Set Column Class
+		
+		//setRowSelectionAllowed(true);
+		return sql.toString();
+		
+	}   //  prepareTable
 
 	/**
 	 * Clear the table columns from both the model and renderer
 	 */
 	private void clearColumns()
 	{
-		((WListItemRenderer)getItemRenderer()).clearColumns();
+		((WBrowseListItemRenderer)getItemRenderer()).clearColumns();
 		getModel().setNoColumns(0);
 
 		return;
@@ -435,7 +601,7 @@ public class WBrowseListbox extends Listbox implements IBrowseTable, TableValueC
 	 */
 	public void addColumn (String header)
 	{
-		WListItemRenderer renderer = (WListItemRenderer)getItemRenderer();
+		WBrowseListItemRenderer renderer = (WBrowseListItemRenderer)getItemRenderer();
 		renderer.addColumn(Util.cleanAmp(header));
 		getModel().addColumn();
 
@@ -454,7 +620,7 @@ public class WBrowseListbox extends Listbox implements IBrowseTable, TableValueC
 	 */
 	public void setColumnClass (int index, Class classType, boolean readOnly, String header)
 	{
-		WListItemRenderer renderer = (WListItemRenderer)getItemRenderer();
+		WBrowseListItemRenderer renderer = (WBrowseListItemRenderer)getItemRenderer();
 
 		setColumnReadOnly(index, readOnly);
 
@@ -471,8 +637,6 @@ public class WBrowseListbox extends Listbox implements IBrowseTable, TableValueC
 	}
 
 
-
-
     /**
      * Set the attributes of the column.
      *
@@ -482,18 +646,18 @@ public class WBrowseListbox extends Listbox implements IBrowseTable, TableValueC
      *
      * @see #setColumnClass(int, Class, boolean, String)
      */
-    public void setColumnClass (int index, Class classType, boolean readOnly)
+    /*public void setColumnClass (int index, Class classType, boolean readOnly)
     {
         setColumnReadOnly(index, readOnly);
 
-        WListItemRenderer renderer = (WListItemRenderer)getItemRenderer();
+        WBrowseListItemRenderer renderer = (WBrowseListItemRenderer)getItemRenderer();
 
         renderer.setColumnClass(index, classType);
 
         m_modelHeaderClass.add(classType);
 
         return;
-    }
+    }*/
 
 	/**
 	 * Set the attributes of the column.
@@ -505,7 +669,7 @@ public class WBrowseListbox extends Listbox implements IBrowseTable, TableValueC
 	 * @see #setColumnClass(int, Class, boolean)
 	 * @see #addColumn(String)
 	 */
-	public void addColumn(Class classType, boolean readOnly, String header)
+	/*public void addColumn(Class classType, boolean readOnly, String header)
 	{
 		m_modelHeaderClass.add(classType);
 
@@ -513,11 +677,11 @@ public class WBrowseListbox extends Listbox implements IBrowseTable, TableValueC
 
 		addColumn(header);
 
-		WListItemRenderer renderer = (WListItemRenderer)getItemRenderer();
+		WBrowseListItemRenderer renderer = (WBrowseListItemRenderer)getItemRenderer();
 		renderer.setColumnClass((renderer.getNoColumns() - 1), classType);
 
  		return;
-	}
+	}*/
 
 	/**
 	 *	Set the Column to determine the color of the row (based on model index).
@@ -535,7 +699,7 @@ public class WBrowseListbox extends Listbox implements IBrowseTable, TableValueC
 	 *  			The contents must conform to the column layout defined in
 	 *  			{@link #prepareTable(ColumnInfo[], String, String, boolean, String)}
 	 */
-	public void loadTable(ResultSet rs)
+	/*public void loadTable(ResultSet rs)
 	{
 		int no = 0;
 		int row = 0; // model row
@@ -643,7 +807,7 @@ public class WBrowseListbox extends Listbox implements IBrowseTable, TableValueC
 
 		return;
 	}	//	loadTable
-
+	 */
 	/**
 	 * @param col
 	 * @param columnClass
@@ -658,6 +822,7 @@ public class WBrowseListbox extends Listbox implements IBrowseTable, TableValueC
 	 *	Load Table from Object Array.
 	 *  @param pos array of Persistent Objects
 	 */
+	/*
 	public void loadTable(PO[] pos)
 	{
 		int row = 0;
@@ -720,7 +885,7 @@ public class WBrowseListbox extends Listbox implements IBrowseTable, TableValueC
 
 		return;
 	}	//	loadTable
-
+	*/
 	/**
 	 * Clear the table components.
 	 */
@@ -741,7 +906,7 @@ public class WBrowseListbox extends Listbox implements IBrowseTable, TableValueC
 		final int noIndex = -1;
 		Object data;
 
-		if (m_layout == null)
+		if (this.data.getColumnCount() == 0)
 		{
 			throw new UnsupportedOperationException("Layout not defined");
 		}
@@ -794,31 +959,32 @@ public class WBrowseListbox extends Listbox implements IBrowseTable, TableValueC
 	 *
 	 *  @return Array of ColumnInfo
 	 */
+	/*
 	public ColumnInfo[] getLayoutInfo()
 	{
 		return getLayout();
 	}   //  getLayout
-
+	*/
 	/**
 	 * Removes all data stored in the underlying model.
 	 *
 	 */
 	public void clearTable()
 	{
-		WListItemRenderer renderer = null;
+		WBrowseListItemRenderer renderer = null;
 
 		// First clear the model
 		getModel().clear();
 
 		// Then the renderer
-		if (getItemRenderer() instanceof WListItemRenderer)
+		if (getItemRenderer() instanceof WBrowseListItemRenderer)
 		{
-			renderer = (WListItemRenderer)getItemRenderer();
+			renderer = (WBrowseListItemRenderer)getItemRenderer();
 			renderer.clearSelection();
 		}
 		else
 		{
-			throw new IllegalArgumentException("Renderer must be instance of WListItemRenderer");
+			throw new IllegalArgumentException("Renderer must be instance of WBrowseListItemRenderer");
 		}
 
 		return;
@@ -975,7 +1141,13 @@ public class WBrowseListbox extends Listbox implements IBrowseTable, TableValueC
 			// othewise just set the value in the model to the new value
 			else
 			{
-				this.setValueAt(event.getNewValue(), row, col);
+				
+				GridField gfield = (GridField)data.getValue(row, data.getTableIndex(col));
+				setValueAt(gfield, event.getNewValue(), row, col);
+				if (gfield.getCallout()!=null){
+					
+					processCallout(gfield,event.getNewValue(),event.getOldValue(),row,col);
+				}
 			}
 		}
 
@@ -1003,10 +1175,10 @@ public class WBrowseListbox extends Listbox implements IBrowseTable, TableValueC
      * @return the layout of the table
      * @see #setLayout(ColumnInfo[])
      */
-	public ColumnInfo[] getLayout()
+	/*public ColumnInfo[] getLayout()
 	{
 		return m_layout;
-	}
+	}*/
 
 	/**
 	 * Set the column information for the table.
@@ -1014,13 +1186,13 @@ public class WBrowseListbox extends Listbox implements IBrowseTable, TableValueC
 	 * @param layout	The new layout to set for the table
 	 * @see #getLayout()
 	 */
-	private void setLayout(ColumnInfo[] layout)
+	/*private void setLayout(ColumnInfo[] layout)
 	{
 		this.m_layout = layout;
 		getModel().setNoColumns(m_layout.length);
 
 		return;
-	}
+	}*/
 
     /**
      * Respond to a change in the table's model.
@@ -1071,17 +1243,241 @@ public class WBrowseListbox extends Listbox implements IBrowseTable, TableValueC
 		return m_keyColumnIndex;
 	}
 
-	@Override
-	public String prepareTable(MBrowseField[] browse, boolean multiSelection) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
-	@Override
-	public void setColumnClass(int index, GridField gField, int displayType,
-			boolean readOnly, String header) {
-		// TODO Auto-generated method stub
+	/**
+	 * Set Key index From Table
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 21/10/2013, 11:59:42
+	 * @param col
+	 * @return void
+	 */
+	private void setKey(int col)
+	{
+		m_keyColumnIndex = col;
+		vbrowse.m_keyColumnIndex=col;
+	}//setKey
+	
+	
+	/**
+	 *  Set Column Editor & Renderer to Class
+	 *  (after all columns were added)
+	 *  Lauout of IDColumn depemds on multiSelection
+	 *  @param index column index
+	 *  @param c   class of column - determines renderere/editors supported:
+	 *  @param DisplayType define Type Value
+	 *  IDColumn, Boolean, Double (Quantity), BigDecimal (Amount), Integer, Timestamp, String (default)
+	 *  @param readOnly read only flag
+	 *  @param header optional header value
+	 */
+	
+	
+	
+	
+	
+	
+	/*
+
+
+WBrowseListItemRenderer renderer = (WBrowseListItemRenderer)getItemRenderer();
+
+		setColumnReadOnly(index, readOnly);
+
+		renderer.setColumnHeader(index, header);
+
+		renderer.setColumnClass(index, classType);
+
+		if (index < m_modelHeaderClass.size())
+			m_modelHeaderClass.set(index, classType);
+		else
+			m_modelHeaderClass.add(classType);
+			
+			
+			
+	 * 
+	 * 
+	 */
+	
+	
+	
+	
+	public void setColumnClass (int index, GridField gField, int displayType ,boolean readOnly, String header)
+	{
+	//	log.config( "MiniTable.setColumnClass - " + index, c.getName() + ", r/o=" + readOnly);
 		
-	}
+		WBrowseListItemRenderer renderer = (WBrowseListItemRenderer)getItemRenderer();
+		
+		renderer.setColumnHeader(index, header);
+		
+		//  Set R/O
+		setColumnReadOnly(index, readOnly);
 
+		// repaint the table
+		this.repaint();
+		
+	}   //  setColumnClass
+
+	
+
+	/**
+	 *  Set if Totals is Show
+	 *  @param boolean Show
+	 */
+	public void setShowTotals(boolean show)
+	{
+		showTotals= show;
+	}
+	
+	public List<GridField> getgFields() {
+		return gFields;
+	}
+	
+	/**
+	 * Get Browse Rows Data 
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 15/10/2013, 10:01:47
+	 * @return
+	 * @return BrowserRows
+	 */
+	public WBrowserRows getData() {
+		return data;
+	}
+	
+	/**************************************************************************
+	 *  Carlos Parada
+	 *  Adapted for Browse Callouts
+	 *  Process Callout(s) Adapted.
+	 *  <p>
+	 *  The Callout is in the string of
+	 *  "class.method;class.method;"
+	 * If there is no class name, i.e. only a method name, the class is regarded
+	 * as CalloutSystem.
+	 * The class needs to comply with the Interface Callout.
+	 *
+	 * For a limited time, the old notation of Sx_matheod / Ux_menthod is maintained.
+	 *
+	 * @param field field
+	 * @return error message or ""
+	 * @see org.compiere.model.Callout
+	 */
+	public String processCallout (GridField field,Object value,Object oldValue, int currentRow,int currentColumn )
+	{
+		String callout = field.getCallout();
+		if (callout.length() == 0)
+			return "";
+
+
+		//Object value = field.getValue();
+		//Object oldValue = field.getOldValue();
+		logger.fine(field.getColumnName() + "=" + value
+			+ " (" + callout + ") - old=" + oldValue);
+
+		StringTokenizer st = new StringTokenizer(callout, ";,", false);
+		while (st.hasMoreTokens())      //  for each callout
+		{
+			String cmd = st.nextToken().trim();
+			
+			//detect infinite loop
+			if (activeCallouts.contains(cmd)) continue;
+			
+			String retValue = "";
+			// FR [1877902]
+			// CarlosRuiz - globalqss - implement beanshell callout
+			// Victor Perez  - vpj-cd implement JSR 223 Scripting
+			if (cmd.toLowerCase().startsWith(MRule.SCRIPT_PREFIX)) {
+				
+				MRule rule = MRule.get(ctx, cmd.substring(MRule.SCRIPT_PREFIX.length()));
+				if (rule == null) {
+					retValue = "Callout " + cmd + " not found"; 
+					logger.log(Level.SEVERE, retValue);
+					return retValue;
+				}
+				if ( !  (rule.getEventType().equals(MRule.EVENTTYPE_Callout) 
+					  && rule.getRuleType().equals(MRule.RULETYPE_JSR223ScriptingAPIs))) {
+					retValue = "Callout " + cmd
+						+ " must be of type JSR 223 and event Callout"; 
+					logger.log(Level.SEVERE, retValue);
+					return retValue;
+				}
+
+				ScriptEngine engine = rule.getScriptEngine();
+
+				// Window context are    W_
+				// Login context  are    G_
+				MRule.setContext(engine, ctx, vbrowse.p_WindowNo);
+				// now add the callout parameters windowNo, tab, field, value, oldValue to the engine 
+				// Method arguments context are A_
+				engine.put(MRule.ARGUMENTS_PREFIX + "WindowNo", vbrowse.p_WindowNo);
+				engine.put(MRule.ARGUMENTS_PREFIX + "Tab", this);
+				engine.put(MRule.ARGUMENTS_PREFIX + "Field", field);
+				engine.put(MRule.ARGUMENTS_PREFIX + "Value", value);
+				engine.put(MRule.ARGUMENTS_PREFIX + "OldValue", oldValue);
+				engine.put(MRule.ARGUMENTS_PREFIX + "currentRow", currentRow);
+				engine.put(MRule.ARGUMENTS_PREFIX + "currentColumn", currentColumn);
+				engine.put(MRule.ARGUMENTS_PREFIX + "Ctx", ctx);
+
+				try 
+				{
+					activeCallouts.add(cmd);
+					retValue = engine.eval(rule.getScript()).toString();
+				}
+				catch (Exception e)
+				{
+					logger.log(Level.SEVERE, "", e);
+					retValue = 	"Callout Invalid: " + e.toString();
+					return retValue;
+				}
+				finally
+				{
+					activeCallouts.remove(cmd);
+				}
+				
+			} else {
+
+				WBrowserCallout call = null;
+				String method = null;
+				int methodStart = cmd.lastIndexOf('.');
+				try
+				{
+					if (methodStart != -1)      //  no class
+					{
+						Class<?> cClass = Class.forName(cmd.substring(0,methodStart));
+						call = (WBrowserCallout)cClass.newInstance();
+						method = cmd.substring(methodStart+1);
+					}
+				}
+				catch (Exception e)
+				{
+					logger.log(Level.SEVERE, "class", e);
+					return "Callout Invalid: " + cmd + " (" + e.toString() + ")";
+				}
+
+				if (call == null || method == null || method.length() == 0)
+					return "Callout Invalid: " + method;
+
+				try
+				{
+					activeCallouts.add(cmd);
+					activeCalloutInstance.add(call);
+					retValue = call.start(ctx, method, vbrowse.p_WindowNo, data, field, value, oldValue,currentRow,currentColumn);
+				}
+				catch (Exception e)
+				{
+					logger.log(Level.SEVERE, "start", e);
+					retValue = 	"Callout Invalid: " + e.toString();
+					return retValue;
+				}
+				finally
+				{
+					activeCallouts.remove(cmd);
+					activeCalloutInstance.remove(call);
+				}
+				
+			}			
+			
+			if (!Util.isEmpty(retValue))		//	interrupt on first error
+			{
+				logger.severe (retValue);
+				return retValue;
+			}
+		}   //  for each callout
+		return "";
+	}	//	processCallout
 }

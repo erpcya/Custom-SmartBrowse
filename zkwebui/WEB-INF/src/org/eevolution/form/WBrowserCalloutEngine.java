@@ -29,13 +29,13 @@ import org.compiere.util.CLogger;
  * Browser Callout Engine.
  * @author eEvolution author Victor Perez<victor.perez@e-evolution.com>
  */
-public class BrowserCalloutEngine extends CalloutEngine implements BrowserCallout {
+public class WBrowserCalloutEngine extends CalloutEngine implements WBrowserCallout {
 
 	
 	/** Logger */
 	protected CLogger log = CLogger.getCLogger(getClass());
-	private BrowserRows m_mRow;
 	
+	private WBrowserRows m_WRow;
 	private GridField m_mField;
 	
 
@@ -43,8 +43,8 @@ public class BrowserCalloutEngine extends CalloutEngine implements BrowserCallou
 	 * 
 	 * @return Browser Row
 	 */
-	public BrowserRows getBrowserRow() {
-		return m_mRow;
+	public WBrowserRows getBrowserRow() {
+		return m_WRow;
 	}
 
 	/**
@@ -55,29 +55,31 @@ public class BrowserCalloutEngine extends CalloutEngine implements BrowserCallou
 		return m_mField;
 	}
 
-	@Override
 	/**
-	 *	Start BrowserCallout.
-	 *  <p>
-	 *	Callout's are used for cross field validation and setting values in other fields
-	 *	when returning a non empty (error message) string, an exception is raised
-	 *  <p>
-	 *	When invoked, the Tab model has the new value!
-	 *  @param ctx      Context
-	 *  @param method   Method name
-	 *  @param WindowNo current Window No
-	 *  @param mRow  	Row Browser
-	 *  @param mField   Model Field
-	 *  @param value    The new value
-	 *  @param oldValue The old value
-	 *  @return Error message or ""
+	 * 	Get Method
+	 *	@param methodName method name
+	 *	@return method or null
 	 */
+	private Method getMethod (String methodName)
+	{
+		Method[] allMethods = getClass().getMethods();
+		for (int i = 0; i < allMethods.length; i++)
+		{
+			if (methodName.equals(allMethods[i].getName()))
+				return allMethods[i];
+		}
+		return null;
+	}	//	getMethod
+
+	@Override
 	public String start(Properties ctx, String methodName, int WindowNo,
-			BrowserRows mRow, GridField mField, Object value, Object oldValue, int currentRow, int currentColumn) {
+			WBrowserRows mRow, GridField mField, Object value, Object oldValue,
+			int currentRow, int currentColumn) {
+		// TODO Auto-generated method stub
 		if (methodName == null || methodName.length() == 0)
 			throw new IllegalArgumentException("No Method Name");
 
-		m_mRow = mRow;
+		m_WRow = mRow;
 		m_mField = mField;
 
 		//
@@ -120,26 +122,10 @@ public class BrowserCalloutEngine extends CalloutEngine implements BrowserCallou
 				retValue = ex.toString();
 			}
 		} finally {
-			m_mRow = null;
+			m_WRow = null;
 			m_mField = null;
 		}
 		return retValue;
-	} // start
-	
-	/**
-	 * 	Get Method
-	 *	@param methodName method name
-	 *	@return method or null
-	 */
-	private Method getMethod (String methodName)
-	{
-		Method[] allMethods = getClass().getMethods();
-		for (int i = 0; i < allMethods.length; i++)
-		{
-			if (methodName.equals(allMethods[i].getName()))
-				return allMethods[i];
-		}
-		return null;
-	}	//	getMethod
+	}
 	
 } // BrowserCalloutEngine

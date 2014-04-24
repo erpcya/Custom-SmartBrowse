@@ -26,6 +26,9 @@
     <fileset dir="${adempiere.trunk}/zkwebui/WEB-INF/lib">
       <include name="*.jar"/>
     </fileset>
+    <fileset dir="${adempiere.trunk}/zkwebui/dist">
+      <include name="*.war"/>
+    </fileset>
   </path>
 
   <!-- @author Carlos Parada Set Path --> 
@@ -42,6 +45,10 @@
       <include name="*.jar"/>
     </fileset>
 
+    <fileset dir="${adempiere.trunk}/zkwebui/dist">
+      <include name="*.war"/>
+    </fileset>
+    
   </path>
 	
   	
@@ -50,7 +57,7 @@
   <target name="zkcompile" depends="init_zk"
         description="compile the source " >
     <!-- Compile the zk java code from ${src} into ${zkclasses} -->
-    <javac srcdir="${zksrc}" destdir="${zkclasses}">
+    <javac srcdir="${zksrc}" destdir="${zkclasses}" includeantruntime="false" >
       <classpath refid="compilezk.classpath"/>
     </javac>
     <jar jarfile="${basedir}/zkpackages/Custom-SmartBrowse/lib/Custom-SmartBrowse.jar" basedir="${zkjar}"/>
@@ -60,7 +67,7 @@
   <target name="compile" depends="init_class"
         description="compile the source " >
     <!-- Compile the zk java code from ${src} into ${zkclasses} -->
-    <javac srcdir="${patches}:${client}" destdir="${class}">
+    <javac srcdir="${patches}:${client}" destdir="${class}" includeantruntime="false" >
       <classpath refid="compile.classpath"/>
     </javac>
     <!--
@@ -73,7 +80,7 @@
   
 	
   <!-- @author Carlos Parada Compile All Class Directory --> 
-  <target name="compileall" depends="compile,zkcompile">
+  <target name="compileall" depends="compile,zkcompile" >
   	<echo message="Compile All Project"/>
   </target>
 	
