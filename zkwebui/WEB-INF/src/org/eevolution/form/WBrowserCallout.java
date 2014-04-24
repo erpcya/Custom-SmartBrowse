@@ -26,8 +26,9 @@ import org.compiere.model.GridField;
  *  Used in Browser
  *  @author   eEvolution author Victor Perez<victor.perez@e-evolution.com>
  */ 
-public interface BrowserCallout
+public interface WBrowserCallout
 {
+
 	/**
 	 *	Start BrowserCallout.
 	 *  <p>
@@ -46,8 +47,8 @@ public interface BrowserCallout
 	 *  @return Error message or ""
 	 */
 	public String start (Properties ctx, String method, int WindowNo,
-		BrowserRows mRow, GridField mField, Object value, Object oldValue, int currentRow, int currentColumn);
-	
+		WBrowserRows mRow, GridField mField, Object value, Object oldValue, int currentRow, int currentColumn);
+
 	/**
 	 *	Conversion Rules.
 	 *	Convert a String
