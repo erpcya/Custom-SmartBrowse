@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <jardesc>
-    <jar path="Custom-SmartBrowse/packages/LVE-SmartBrowse/lib/LVE-SmartBrowse.jar"/>
-    <options buildIfNeeded="true" compress="true" descriptionLocation="/Custom-SmartBrowse/JarDesk.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="false" overwrite="false" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
+    <jar path="Custom-SmartBrowse/packages/Custom-SmartBrowse/lib/Custom-SmartBrowse.jar"/>
+    <options buildIfNeeded="true" compress="true" descriptionLocation="/Custom-SmartBrowse/JarDesc.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="false" overwrite="false" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
     <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
     <selectedProjects/>
     <manifest generateManifest="true" manifestLocation="" manifestVersion="1.0" reuseManifest="false" saveManifest="false" usesManifest="true">
