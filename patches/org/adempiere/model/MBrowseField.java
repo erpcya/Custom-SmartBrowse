@@ -158,17 +158,19 @@ public class MBrowseField extends X_AD_Browse_Field {
 
 		return success;
 	}
-	
+	//	Dixon Martinez 07/17/2014 10:27:00
+	//	Comment for problems in scripts
 	/**
 	 * 	Before Delete
 	 *	@return true of it can be deleted
 	 */
-	protected boolean beforeDelete ()
+	/*protected boolean beforeDelete ()
 	{
 		DB.executeUpdate("DELETE FROM AD_Browse_Field_Trl WHERE AD_Browse_Field_ID=? ", getAD_Browse_Field_ID(),get_TrxName());
 		return true;
 	}	//	beforeDelete
-
+*/
+	//	End Dixon Martinez
 	/**
 	 * get Element
 	 * 
