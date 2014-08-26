@@ -274,7 +274,7 @@ public class WBrowser extends Browser implements IFormController,
 			String staticWhere, String orderBy) {
 		
 		
-		StringBuffer sql = new StringBuffer("SELECT DISTINCT ");
+		StringBuffer sql = new StringBuffer("SELECT ");//DISTINCT ");
 		
 		sql.append(detail.prepareTable(m_generalLayout, p_multiSelection));
 		detail.setShowTotals(true);
