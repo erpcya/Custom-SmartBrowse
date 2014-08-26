@@ -322,7 +322,7 @@ public class VBrowser extends Browser implements ActionListener,
 			String staticWhere, String orderBy) {
 		
 		
-		StringBuffer sql = new StringBuffer("SELECT DISTINCT ");
+		StringBuffer sql = new StringBuffer("SELECT ");//DISTINCT ");
 		
 		sql.append(detail.prepareTable(m_generalLayout, p_multiSelection));
 		// Table Selection (Invoked before setting column class so that row
