@@ -186,11 +186,7 @@ public class VBrowser extends Browser implements ActionListener,
 		
 		if (m_Browse.getAD_Process_ID() > 0) {
 			m_process = MProcess.get(Env.getCtx(), m_Browse.getAD_Process_ID());
-			ProcessInfo pi = new ProcessInfo(m_process.getName(),
-					m_Browse.getAD_Process_ID());
-			pi.setAD_User_ID(Env.getAD_User_ID(Env.getCtx()));
-			pi.setAD_Client_ID(Env.getAD_Client_ID(Env.getCtx()));
-			setBrowseProcessInfo(pi);
+			initProcessInfo();
 			parameterPanel = new ProcessParameterPanel(p_WindowNo, getBrowseProcessInfo());
 			parameterPanel.setMode(ProcessParameterPanel.MODE_HORIZONTAL);
 			parameterPanel.init();
@@ -198,6 +194,13 @@ public class VBrowser extends Browser implements ActionListener,
 		}
 	}
 
+	private void initProcessInfo(){
+		ProcessInfo pi = new ProcessInfo(m_process.getName(),
+				m_Browse.getAD_Process_ID());
+		pi.setAD_Client_ID(Env.getAD_Client_ID(Env.getCtx()));
+		setBrowseProcessInfo(pi);
+	}
+	
 	/**
 	 * General Init
 	 * 
@@ -464,7 +467,6 @@ public class VBrowser extends Browser implements ActionListener,
 					IDColumn dataColumn = (IDColumn) data;
 					if (dataColumn.isSelected()) {
 						LinkedHashMap<String, Object> values = new LinkedHashMap<String, Object>();
-						int col = 0;
 						for(int i =0;i<bRows.getColumnCount();i++)
 						{
 							MBrowseField bField =bRows.getBrowseField(i);
@@ -476,24 +478,6 @@ public class VBrowser extends Browser implements ActionListener,
 							}
 								
 						}
-						/*for (Info_Column column : m_generalLayout)
-						{	
-							String columnName = column.getColSQL().substring(
-									column.getColSQL().indexOf("AS ") + 3);
-							if (!column.isReadOnly()
-									|| IsIdentifierSelection(columnName)) {
-								if (!column.isKeyPairCol()) {
-									Object value = detail.getModel()
-											.getValueAt(row, col);
-									values.put(columnName, value);
-								} else {
-									KeyNamePair value = (KeyNamePair) detail
-											.getModel().getValueAt(row, col);
-									values.put(columnName, value.getKey());
-								}
-							}
-							col++;
-						}*///Replantear
 						if(values.size() > 0)
 						{
 							m_values.put(dataColumn.getRecord_ID(), values);
@@ -822,12 +806,13 @@ public class VBrowser extends Browser implements ActionListener,
 			
 			ProcessInfo pi = getBrowseProcessInfo();
 			pi.setAD_PInstance_ID(instance.getAD_PInstance_ID());
-			setBrowseProcessInfo(pi);
+			
 			//Save Values Browse Field Update
 			createT_Selection_Browse(instance.getAD_PInstance_ID());
 			
 			// call process 
 			parameterPanel.saveParameters();
+			
 			// Execute Process
 			ProcessCtl worker = new ProcessCtl(this, Env.getWindowNo(m_frame),
 					getBrowseProcessInfo() , null);
@@ -835,10 +820,12 @@ public class VBrowser extends Browser implements ActionListener,
 			worker.run(); // complete tasks in unlockUI /
 			m_waiting.doNotWait();
 			setStatusLine(pi.getSummary(), pi.isError());
-			
+			initProcessInfo();
+			parameterPanel.setM_processInfo(getBrowseProcessInfo());
 		}
 		m_frame.setCursor(Cursor.getDefaultCursor());
 		p_loadedOK = initBrowser();
+		
 		//Carlos Parada Set Context From Fields
 		searchPanel.setContextfromFields();
 		collapsibleSeach.setCollapsed(false);
