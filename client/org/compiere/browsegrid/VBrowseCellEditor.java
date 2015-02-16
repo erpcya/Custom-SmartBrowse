@@ -202,6 +202,7 @@ public final class VBrowseCellEditor extends AbstractCellEditor
 	{
 		if (m_table == null)
 			return;
+		
 		log.fine(e.getPropertyName() + "=" + e.getNewValue());
 		if (e.getOldValue()!=e.getNewValue())
 		{
@@ -211,6 +212,10 @@ public final class VBrowseCellEditor extends AbstractCellEditor
 				m_table.processCallout(m_mField,e.getNewValue(),e.getOldValue(),m_Row,m_Col);
 			}
 		}
+		else if (e.getNewValue() == null){
+			m_table.setValueAt(m_mField, e.getNewValue(), m_Row, m_Col);
+		}
+			
 		//
 		//((DefaultTableModel)m_table.getModel()).setChanged(true);
 	}   //  vetoableChange
