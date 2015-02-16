@@ -307,7 +307,8 @@ public abstract class Browser {
 	public void setBrowseProcessInfo(ProcessInfo pi) {
 		m_browse_pi = pi;
 		if(m_browse_pi != null)
-			m_browse_pi.setRecord_ID(m_browse_pi.getRecord_ID());
+			if(	m_pi !=null)
+				m_browse_pi.setRecord_ID(m_browse_pi.getRecord_ID());
 	}
 
 	public ProcessInfo getBrowseProcessInfo() {
@@ -320,6 +321,9 @@ public abstract class Browser {
 	
 	public void setProcessInfo(ProcessInfo pi ){
 		m_pi = pi;
+		if(m_pi != null)
+			if(	m_browse_pi !=null)
+				m_browse_pi.setRecord_ID(m_pi.getRecord_ID());
 	}
 	
 	public String getKeyColumn() {
