@@ -204,6 +204,7 @@ public class VBrowser extends Browser implements ActionListener,
 				m_Browse.getAD_Process_ID());
 		pi.setAD_Client_ID(Env.getAD_Client_ID(Env.getCtx()));
 		pi.setAD_User_ID(Env.getAD_User_ID(Env.getCtx()));
+		pi.setRecord_ID(m_pi.getRecord_ID());
 		setBrowseProcessInfo(pi);
 	}
 	

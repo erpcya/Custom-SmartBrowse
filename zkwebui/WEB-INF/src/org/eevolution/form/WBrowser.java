@@ -205,6 +205,7 @@ public class WBrowser extends Browser implements IFormController,
 				m_Browse.getAD_Process_ID());
 		pi.setAD_Client_ID(Env.getAD_Client_ID(Env.getCtx()));
 		pi.setAD_User_ID(Env.getAD_User_ID(Env.getCtx()));
+		pi.setRecord_ID(m_pi.getRecord_ID());
 		setBrowseProcessInfo(pi);
 	}
 
