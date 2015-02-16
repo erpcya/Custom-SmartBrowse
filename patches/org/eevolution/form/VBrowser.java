@@ -193,11 +193,17 @@ public class VBrowser extends Browser implements ActionListener,
 			processPanel.add(parameterPanel, BorderLayout.CENTER);
 		}
 	}
-
+	
+	/**
+	 * Init Process Info
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 15/2/2015, 19:47:02
+	 * @return void
+	 */
 	private void initProcessInfo(){
 		ProcessInfo pi = new ProcessInfo(m_process.getName(),
 				m_Browse.getAD_Process_ID());
 		pi.setAD_Client_ID(Env.getAD_Client_ID(Env.getCtx()));
+		pi.setAD_User_ID(Env.getAD_User_ID(Env.getCtx()));
 		setBrowseProcessInfo(pi);
 	}
 	

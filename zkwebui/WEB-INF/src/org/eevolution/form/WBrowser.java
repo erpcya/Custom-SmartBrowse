@@ -45,7 +45,6 @@ import org.adempiere.webui.component.ToolBar;
 import org.adempiere.webui.component.VerticalBox;
 import org.adempiere.webui.component.WAppsAction;
 import org.adempiere.webui.component.WBrowseListbox;
-import org.adempiere.webui.component.WListbox;
 import org.adempiere.webui.editor.WEditor;
 import org.adempiere.webui.event.ValueChangeEvent;
 import org.adempiere.webui.event.ValueChangeListener;
@@ -57,8 +56,6 @@ import org.adempiere.webui.panel.StatusBarPanel;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.window.FDialog;
 import org.compiere.apps.ProcessCtl;
-import org.compiere.apps.search.Info_Column;
-import org.compiere.grid.ed.VEditor;
 import org.compiere.minigrid.IDColumn;
 import org.compiere.model.GridField;
 import org.compiere.model.GridFieldVO;
@@ -71,7 +68,6 @@ import org.compiere.util.ASyncProcess;
 import org.compiere.util.DB;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
-import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
 import org.zkoss.util.media.AMedia;
 import org.zkoss.zk.ui.event.Event;
@@ -181,11 +177,7 @@ public class WBrowser extends Browser implements IFormController,
 		if (m_Browse.getAD_Process_ID() > 0) {
 			
 			m_process = MProcess.get(Env.getCtx(), m_Browse.getAD_Process_ID());
-			ProcessInfo pi = new ProcessInfo(m_process.getName(),
-					m_Browse.getAD_Process_ID());
-			pi.setAD_User_ID(Env.getAD_User_ID(Env.getCtx()));
-			pi.setAD_Client_ID(Env.getAD_Client_ID(Env.getCtx()));
-			setBrowseProcessInfo(pi);
+			initProcessInfo();
 			parameterPanel = new ProcessParameterPanel(p_WindowNo, getBrowseProcessInfo() , "100%");
 			parameterPanel.setMode(ProcessParameterPanel.BROWSER_MODE);
 			parameterPanel.init();
@@ -201,6 +193,19 @@ public class WBrowser extends Browser implements IFormController,
 			south.appendChild(div);	
 			detailPanel.appendChild(south);
 		}		
+	}
+	
+	/**
+	 * Init Process Info
+	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 15/2/2015, 19:47:02
+	 * @return void
+	 */
+	private void initProcessInfo(){
+		ProcessInfo pi = new ProcessInfo(m_process.getName(),
+				m_Browse.getAD_Process_ID());
+		pi.setAD_Client_ID(Env.getAD_Client_ID(Env.getCtx()));
+		pi.setAD_User_ID(Env.getAD_User_ID(Env.getCtx()));
+		setBrowseProcessInfo(pi);
 	}
 
 	private boolean initBrowser() {
@@ -800,6 +805,8 @@ public class WBrowser extends Browser implements IFormController,
 			worker.run();
 			hideBusyDialog();
 			setStatusLine(pi.getSummary(), pi.isError());
+			initProcessInfo();
+			parameterPanel.setM_processInfo(getBrowseProcessInfo());
 		}	
 		p_loadedOK = initBrowser();
 		collapsibleSeach.setOpen(true);

@@ -839,7 +839,7 @@ public class WBrowseListItemRenderer implements ListitemRenderer, EventListener,
 				fireTableValueChange(vcEvent);
 			}
 		}
-		else if (event.getTarget() instanceof WBrowseListbox && Events.ON_SELECT.equals(event.getName()))
+		if (event.getTarget() instanceof WBrowseListbox && Events.ON_SELECT.equals(event.getName()))
 		{
 			WBrowseListbox table = (WBrowseListbox) event.getTarget();
 			if (table.isCheckmark()) {
