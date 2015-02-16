@@ -146,6 +146,9 @@ public abstract class Browser {
 
 	/** Browse Process Info */
 	public ProcessInfo m_browse_pi = null;
+	
+	/** Process Info */
+	public ProcessInfo m_pi = null;
 
 	/** Loading success indicator */
 	public boolean p_loadedOK = false;
@@ -309,6 +312,14 @@ public abstract class Browser {
 
 	public ProcessInfo getBrowseProcessInfo() {
 		return m_browse_pi;
+	}
+	
+	public ProcessInfo getProcessInfo(){
+		return m_pi;
+	}
+	
+	public void setProcessInfo(ProcessInfo pi ){
+		m_pi = pi;
 	}
 	
 	public String getKeyColumn() {
