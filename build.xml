@@ -19,7 +19,10 @@
   
   <!-- @author Carlos Parada Set Path --> 
   <path id="compile.classpath">
-    <pathelement location="${adempiere.trunk}/zkwebui/WEB-INF/classes"/>
+   <fileset dir="${lveadempiere.trunk}/packages/LVE-ADempiere/lib">
+		<include name="*.jar"/>
+   </fileset>
+   <pathelement location="${adempiere.trunk}/zkwebui/WEB-INF/classes"/>
     <fileset dir="${adempiere.trunk}/lib">
       <include name="*.jar"/>
     </fileset>
@@ -33,6 +36,9 @@
 
   <!-- @author Carlos Parada Set Path --> 
   <path id="compilezk.classpath">
+    <fileset dir="${lveadempiere.trunk}/packages/LVE-ADempiere/lib">
+ 		<include name="*.jar"/>
+  	</fileset>
     <pathelement location="${adempiere.trunk}/zkwebui/WEB-INF/classes"/>
   	
   	<fileset dir="${basedir}/packages/Custom-SmartBrowse/lib">
