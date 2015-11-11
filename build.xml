@@ -19,7 +19,7 @@
   
   <!-- @author Carlos Parada Set Path --> 
   <path id="compile.classpath">
-   <fileset dir="${lveadempiere.trunk}/packages/LVE-ADempiere/lib">
+   <fileset dir="${CST-STD.trunk}/packages/01-CST-STD/lib">
 		<include name="*.jar"/>
    </fileset>
    <pathelement location="${adempiere.trunk}/zkwebui/WEB-INF/classes"/>
@@ -36,7 +36,7 @@
 
   <!-- @author Carlos Parada Set Path --> 
   <path id="compilezk.classpath">
-    <fileset dir="${lveadempiere.trunk}/packages/LVE-ADempiere/lib">
+    <fileset dir="${CST-STD.trunk}/packages/01-CST-STD/lib">
  		<include name="*.jar"/>
   	</fileset>
     <pathelement location="${adempiere.trunk}/zkwebui/WEB-INF/classes"/>
@@ -66,7 +66,7 @@
     <javac srcdir="${zksrc}" destdir="${zkclasses}" includeantruntime="false" >
       <classpath refid="compilezk.classpath"/>
     </javac>
-    <jar jarfile="${basedir}/zkpackages/Custom-SmartBrowse/lib/Custom-SmartBrowse.jar" basedir="${zkjar}"/>
+    <jar jarfile="${basedir}/zkpackages/${packages.name}/lib/${project.name}.jar" basedir="${zkjar}"/>
   </target>
 
   <!-- @author Carlos Parada Compile Class Directory --> 	
@@ -81,7 +81,7 @@
       <classpath refid="compile.classpath"/>
     </javac>
     -->
-    <jar jarfile="${basedir}/packages/Custom-SmartBrowse/lib/Custom-SmartBrowse.jar" basedir="${class}"/>
+    <jar jarfile="${basedir}/packages/${packages.name}/lib/${project.name}.jar" basedir="${class}"/>
   </target>
   
 	
