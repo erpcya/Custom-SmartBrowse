@@ -36,14 +36,16 @@
 
   <!-- @author Carlos Parada Set Path --> 
   <path id="compilezk.classpath">
+      
     <fileset dir="${CST-STD.trunk}/packages/01-CST-STD/lib">
  		<include name="*.jar"/>
   	</fileset>
-    <pathelement location="${adempiere.trunk}/zkwebui/WEB-INF/classes"/>
-  	
   	<fileset dir="${basedir}/packages/Custom-SmartBrowse/lib">
   	  	      <include name="*.jar"/>
   	</fileset>
+    <pathelement location="${adempiere.trunk}/zkwebui/WEB-INF/classes"/>
+  	
+  	
     <fileset dir="${adempiere.trunk}/lib">
       <include name="*.jar"/>
     </fileset>

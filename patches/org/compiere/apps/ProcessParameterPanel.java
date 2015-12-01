@@ -31,6 +31,7 @@ import java.util.logging.Level;
 
 import javax.swing.Box;
 import javax.swing.JLabel;
+import javax.swing.ScrollPaneLayout;
 
 import org.adempiere.exceptions.DBException;
 import org.compiere.grid.ed.VEditor;
@@ -41,8 +42,8 @@ import org.compiere.model.MClient;
 import org.compiere.model.MLookup;
 import org.compiere.model.MPInstancePara;
 import org.compiere.process.ProcessInfo;
-import org.compiere.swing.CLabel;
 import org.compiere.swing.CPanel;
+import org.compiere.swing.CScrollPane;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -60,6 +61,8 @@ import org.compiere.util.Env;
  * @author victor.perez@e-evoluton.com, www.e-evolution.com 
  * 			<li>FR [ 3426137 ] Smart Browser
  * 			 https://sourceforge.net/tracker/?func=detail&aid=3426137&group_id=176962&atid=879335
+ * 			<li> https://adempiere.atlassian.net/browse/ADEMPIERE-97
+ * 			<li> The parameters is not show when use display logic, the parameters dialog window is not automatically resize.
  * @version 	2006-12-01
  * @author Michael McKay (mjmckay)
  * 			<li>BF3423098 - Labels for process parameters with display logic false are still displayed
@@ -115,6 +118,8 @@ public class ProcessParameterPanel extends CPanel implements VetoableChangeListe
 		//
 		private BorderLayout mainLayout = new BorderLayout();
 		private CPanel centerPanel = new CPanel();
+		private CScrollPane centerScroll = new CScrollPane();
+		private ScrollPaneLayout scrollPaneLayout = new ScrollPaneLayout();
 		private GridBagLayout centerLayout = new GridBagLayout();
 
 		/**
@@ -126,7 +131,9 @@ public class ProcessParameterPanel extends CPanel implements VetoableChangeListe
 			setMode(MODE_VERTICAL);
 			this.setLayout(mainLayout);
 			centerPanel.setLayout(centerLayout);
-			this.add(centerPanel, BorderLayout.CENTER);
+			centerScroll.getViewport().add(centerPanel);
+			//centerScroll.add(centerPanel);
+			this.add(centerScroll, BorderLayout.CENTER);
 		}	//	jbInit
 
 		/**
@@ -558,7 +565,7 @@ public class ProcessParameterPanel extends CPanel implements VetoableChangeListe
 									m_separators.get(index).setText("");
 							}
 						}
-					}
+					}					
 				}
 			}
 		} // Dynamic Display.
@@ -704,7 +711,7 @@ public class ProcessParameterPanel extends CPanel implements VetoableChangeListe
 				if (editor2 != null)
 					para.setInfo_To (editor2.getDisplay());
 				//
-				para.save();
+				para.saveEx();
 				log.fine(para.toString());
 			}	//	for every parameter
 
@@ -726,6 +733,16 @@ public class ProcessParameterPanel extends CPanel implements VetoableChangeListe
 					f.restoreValue();
 			}
 		}
+		
+		public void refreshContext()
+	 	{
+			for(int i = 0; i < m_vEditors.size(); i++) {
+				VEditor editor = m_vEditors.get(i);
+				GridField mField = editor.getField();
+				editor.setValue(mField.getDefault());
+			}
+	 	}
+		
 		/**
 		 * Define the mode to Display the parameters
 		 * @param mode
@@ -735,13 +752,9 @@ public class ProcessParameterPanel extends CPanel implements VetoableChangeListe
 			MODE = mode;
 		}
 		
-		/**
-		 * Set Process Info for Smart Browse Process Info
-		 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 15/2/2015, 18:29:14
-		 * @param m_processInfo
-		 * @return void
-		 */
-		public void setM_processInfo(ProcessInfo m_processInfo) {
-			this.m_processInfo = m_processInfo;
+		// Allow restart Process Info
+		public void setProcessInfo(ProcessInfo pi)
+		{
+			m_processInfo = pi;
 		}
 	}	//	ProcessParameterPanel

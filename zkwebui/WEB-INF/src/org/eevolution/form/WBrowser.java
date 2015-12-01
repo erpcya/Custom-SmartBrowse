@@ -806,7 +806,7 @@ public class WBrowser extends Browser implements IFormController,
 			hideBusyDialog();
 			setStatusLine(pi.getSummary(), pi.isError());
 			initProcessInfo();
-			parameterPanel.setM_processInfo(getBrowseProcessInfo());
+			parameterPanel.setProcessInfo(getBrowseProcessInfo());
 		}	
 		p_loadedOK = initBrowser();
 		collapsibleSeach.setOpen(true);

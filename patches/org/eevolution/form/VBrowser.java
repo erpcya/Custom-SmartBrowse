@@ -828,7 +828,8 @@ public class VBrowser extends Browser implements ActionListener,
 			setStatusLine(pi.getSummary(), pi.isError());
 			
 			initProcessInfo();
-			parameterPanel.setM_processInfo(getBrowseProcessInfo());
+//			parameterPanel.setM_processInfo(getBrowseProcessInfo());
+			parameterPanel.setProcessInfo(getBrowseProcessInfo());
 		}
 		m_frame.setCursor(Cursor.getDefaultCursor());
 		p_loadedOK = initBrowser();
