@@ -7,6 +7,6 @@
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/CST-STD"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/adempiere_370_Fork"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/adempiere_370"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
