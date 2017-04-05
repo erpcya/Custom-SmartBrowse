@@ -99,7 +99,8 @@ public class WBrowserSearch extends  Grid implements ValueChangeListener {
 		voBase.IsKey = field.isKey();
 
 		voBase.DefaultValue = field.getDefaultValue();
-		voBase.DefaultValue2 = field.getDefaultValue2();
+		voBase.DefaultValue2 = field.getDefaultValue();
+		voBase.InfoFactoryClass = field.getInfoFactoryClass();
 		voBase.FieldLength = field.getFieldLength();
 		voBase.ReadOnlyLogic = field.getReadOnlyLogic();
 		voBase.DisplayLogic = field.getDisplayLogic();
@@ -114,16 +115,24 @@ public class WBrowserSearch extends  Grid implements ValueChangeListener {
 		voBase.Header = title;
 
 		GridField gField = new GridField(GridFieldVO.createParameter(voBase));
+		
+		
+		WEditor editor = WebEditorFactory.getEditor(gField, false);
+		editor.addValueChangeListener(this);
+		editor.dynamicDisplay();
+		editor.setReadWrite(true);
+
+		gField.addPropertyChangeListener(editor);
+		
 		//  Set Default
 		Object defaultObject = gField.getDefault();
 		gField.setValue (defaultObject, true);
+		if (defaultObject != null)
+			processNewValue(defaultObject, gField.getVO().Help);
 		gField.lookupLoadComplete();
 		m_mFields.add(gField);
 		
-		WEditor editor = WebEditorFactory.getEditor(gField, false);
-		editor.setReadWrite(true);
-		editor.addValueChangeListener(this);
-		editor.dynamicDisplay();
+		
 		m_wEditors.add (editor);
 		
 		if (DisplayType.YesNo != field.getAD_Reference_ID()) {
@@ -207,7 +216,7 @@ public class WBrowserSearch extends  Grid implements ValueChangeListener {
 		}
 	}
 
-	public LinkedHashMap<Object, Object> getParamenters() {
+	public LinkedHashMap<Object, Object> getParameters() {
 		return m_search;
 	}
 
