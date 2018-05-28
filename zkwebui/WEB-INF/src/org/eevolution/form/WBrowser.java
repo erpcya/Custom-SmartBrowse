@@ -44,7 +44,7 @@ import org.adempiere.webui.component.Tabs;
 import org.adempiere.webui.component.ToolBar;
 import org.adempiere.webui.component.VerticalBox;
 import org.adempiere.webui.component.WAppsAction;
-import org.adempiere.webui.component.WBrowseListbox;
+import org.adempiere.webui.component.WListbox;
 import org.adempiere.webui.editor.WEditor;
 import org.adempiere.webui.event.ValueChangeEvent;
 import org.adempiere.webui.event.ValueChangeListener;
@@ -56,8 +56,8 @@ import org.adempiere.webui.panel.StatusBarPanel;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.window.FDialog;
 import org.compiere.apps.ProcessCtl;
+import org.compiere.apps.search.Info_Column;
 import org.compiere.minigrid.IDColumn;
-import org.compiere.model.GridField;
 import org.compiere.model.GridFieldVO;
 import org.compiere.model.MPInstance;
 import org.compiere.model.MProcess;
@@ -66,8 +66,8 @@ import org.compiere.model.MRole;
 import org.compiere.process.ProcessInfo;
 import org.compiere.util.ASyncProcess;
 import org.compiere.util.DB;
-import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
+import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
 import org.zkoss.util.media.AMedia;
 import org.zkoss.zk.ui.event.Event;
@@ -107,7 +107,7 @@ public class WBrowser extends Browser implements IFormController,
 	private Button bZoom;
 	private Button bSelectAll;
 
-	private WBrowseListbox detail;
+	private WListbox detail;
 	private Borderlayout graphPanel;
 	private WBrowserSearch searchGrid;
 	private Borderlayout searchTab;
@@ -177,7 +177,11 @@ public class WBrowser extends Browser implements IFormController,
 		if (m_Browse.getAD_Process_ID() > 0) {
 			
 			m_process = MProcess.get(Env.getCtx(), m_Browse.getAD_Process_ID());
-			initProcessInfo();
+			ProcessInfo pi = new ProcessInfo(m_process.getName(),
+					m_Browse.getAD_Process_ID());
+			pi.setAD_User_ID(Env.getAD_User_ID(Env.getCtx()));
+			pi.setAD_Client_ID(Env.getAD_Client_ID(Env.getCtx()));
+			setBrowseProcessInfo(pi);
 			parameterPanel = new ProcessParameterPanel(p_WindowNo, getBrowseProcessInfo() , "100%");
 			parameterPanel.setMode(ProcessParameterPanel.BROWSER_MODE);
 			parameterPanel.init();
@@ -194,19 +198,6 @@ public class WBrowser extends Browser implements IFormController,
 			detailPanel.appendChild(south);
 		}		
 	}
-	
-	/**
-	 * Init Process Info
-	 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 15/2/2015, 19:47:02
-	 * @return void
-	 */
-	private void initProcessInfo(){
-		ProcessInfo pi = new ProcessInfo(m_process.getName(),
-				m_Browse.getAD_Process_ID());
-		pi.setAD_Client_ID(Env.getAD_Client_ID(Env.getCtx()));
-		pi.setAD_User_ID(Env.getAD_User_ID(Env.getCtx()));
-		setBrowseProcessInfo(pi);
-	}
 
 	private boolean initBrowser() {
 		if (!initBrowserTable())
@@ -218,25 +209,22 @@ public class WBrowser extends Browser implements IFormController,
 			where.append(p_whereClause);
 		}
 
-		/*prepareTable(m_generalLayout, m_View.getFromClause(), where.toString(),
-				"2");*/ //Replantear
-		
-		prepareTable(m_View.getFromClause(), where.toString(),
+		prepareTable(m_generalLayout, m_View.getFromClause(), where.toString(),
 				"2");
 		return true;
 	}
 
 	private boolean initBrowserTable() {
-		/*ArrayList<Info_Column> list = initBrowserData();
+		ArrayList<Info_Column> list = initBrowserData();
 		if (list.size() == 0) {
 
 			log.log(Level.SEVERE, "No Brwose for view=" + m_View.getName());
 			return false;
 		}
-		log.finest("Browse Fields #" + list.size());*/	
+		log.finest("Browse Fields #" + list.size());	
 		// Convert ArrayList to Array
-		/*m_generalLayout = new Info_Column[list.size()];
-		list.toArray(m_generalLayout);*/
+		m_generalLayout = new Info_Column[list.size()];
+		list.toArray(m_generalLayout);
 		return true;
 	}
 
@@ -273,30 +261,10 @@ public class WBrowser extends Browser implements IFormController,
 			setStatusLine(Msg.getMsg(Env.getCtx(), "Deleted") + records, false);
 		}	
 	}
-	
-	
-	protected void prepareTable( String from,
+
+	protected void prepareTable(Info_Column[] layout, String from,
 			String staticWhere, String orderBy) {
-		
-		
-		StringBuffer sql = new StringBuffer("SELECT ");//DISTINCT ");
-		
-		sql.append(detail.prepareTable(m_generalLayout, p_multiSelection));
-		detail.setShowTotals(true);
-
-		sql.append(" FROM ").append(from);
-		sql.append(" WHERE ");
-		m_sqlMain = sql.toString();
-		m_sqlCount = "SELECT COUNT(*) FROM " + from + " WHERE ";
-		m_sqlOrderBy = getSQLOrderBy();
-
-		if (m_keyColumnIndex == -1)
-			log.log(Level.WARNING, "No KeyColumn - " + sql);
-	} // prepareTable
-
-	/*protected void prepareTable(Info_Column[] layout, String from,
-			String staticWhere, String orderBy) {
-		//p_layout = layout;
+		p_layout = layout;
 		detail.prepareTable(layout, "" , "" , true, "");
 		StringBuffer sql = new StringBuffer("SELECT DISTINCT ");
 		for (int i = 0; i < layout.length; i++) {
@@ -320,7 +288,7 @@ public class WBrowser extends Browser implements IFormController,
 		
 		if (m_keyColumnIndex == -1)
 			log.log(Level.WARNING, "No KeyColumn - " + sql);
-	}*/
+	}
 
 	private boolean testCount() {
 		int no = -1;
@@ -372,7 +340,6 @@ public class WBrowser extends Browser implements IFormController,
 
 		if (p_multiSelection) {
 			int rows = detail.getRowCount();
-			WBrowserRows bRows =detail.getData();
 			m_values = new LinkedHashMap<Integer,LinkedHashMap<String,Object>>();
 			for (int row = 0; row < rows; row++) {
 				//Find the IDColumn Key
@@ -383,19 +350,7 @@ public class WBrowser extends Browser implements IFormController,
 					if (dataColumn.isSelected()) {
 						LinkedHashMap<String, Object> values = new LinkedHashMap<String, Object>();
 						int col = 0;
-						
-						for(int i =0;i<bRows.getColumnCount();i++)
-						{
-							MBrowseField bField =bRows.getBrowseField(i);
-							if (!bField.isReadOnly() || bField.isIdentifier() )
-							{
-								GridField gField = (GridField)detail.getData().getValue(row, i);
-								Object value = gField.getValue();
-								values.put(bField.getAD_View_Column().getColumnName(), value);
-							}
-								
-						}
-						/*for (Info_Column column : m_generalLayout)
+						for (Info_Column column : m_generalLayout)
 						{	
 							String columnName = column.getColSQL().substring(
 									column.getColSQL().indexOf("AS ") + 3);
@@ -412,7 +367,7 @@ public class WBrowser extends Browser implements IFormController,
 								}
 							}
 							col++;
-						}*/
+						}
 						if(values.size() > 0)
 						{
 							m_values.put(dataColumn.getRecord_ID(), values);
@@ -529,7 +484,7 @@ public class WBrowser extends Browser implements IFormController,
 		topPanel = new Hbox();
 		searchGrid = new WBrowserSearch(p_WindowNo);
 		bSearch = new Button();
-		detail = new WBrowseListbox(this);
+		detail = new WListbox();
 		bCancel = new Button();
 		bOk = new Button();
 		graphPanel = new Borderlayout();
@@ -805,16 +760,9 @@ public class WBrowser extends Browser implements IFormController,
 			worker.run();
 			hideBusyDialog();
 			setStatusLine(pi.getSummary(), pi.isError());
-			initProcessInfo();
-			parameterPanel.setM_processInfo(getBrowseProcessInfo());
 		}	
 		p_loadedOK = initBrowser();
 		collapsibleSeach.setOpen(true);
-		
-		if (m_pi != null){
-			m_Browse.setAD_Process_ID(0);
-			dispose(true);
-		}
 	}
 	
 	private void showBusyDialog() {
@@ -873,7 +821,6 @@ public class WBrowser extends Browser implements IFormController,
 		PreparedStatement m_pstmt = null;
 		ResultSet m_rs = null;
 		String dataSql = getSQL();
-		int no = 0;
 		long start = System.currentTimeMillis();
 
 		// Clear Table
@@ -886,61 +833,13 @@ public class WBrowser extends Browser implements IFormController,
 			log.fine("End query - " + (System.currentTimeMillis() - start)
 					+ "ms");
 
-			
-			
-			
-			/////////////////NEWWWWWWWWWWWWWWWWWWW ///////////////////////////////
-			
-			while (m_rs.next()) {
-				
-				no++;
-				int row = detail.getRowCount();
-				detail.setRowCount(row + 1);
-				int colOffset = 1; // columns start with 1
-				int colIndex =0;
-				for (int col = 0; col < m_generalLayout.length; col++) {
-					
-					Object value = null;
-					
-					if (m_generalLayout[col].isKey())
-						value = new IDColumn(m_rs.getInt(col+colOffset));
-					else if (m_generalLayout[col].getAD_Reference_ID()==DisplayType.TableDir
-							|| m_generalLayout[col].getAD_Reference_ID()==DisplayType.Table
-							||m_generalLayout[col].getAD_Reference_ID()==DisplayType.Integer
-							||m_generalLayout[col].getAD_Reference_ID()==DisplayType.PAttribute
-							||m_generalLayout[col].getAD_Reference_ID()==DisplayType.Account)	
-						value = m_rs.getInt(col+colOffset);
-					else if (m_generalLayout[col].getAD_Reference_ID()==DisplayType.Amount
-							||m_generalLayout[col].getAD_Reference_ID()==DisplayType.Number)
-						value = m_rs.getBigDecimal(col+colOffset);
-					else if (m_generalLayout[col].getAD_Reference_ID()==DisplayType.YesNo){
-						value = m_rs.getString(col+colOffset);
-						if (value!=null)
-							value= value.equals("Y");
-					}
-					else if (m_generalLayout[col].getAD_Reference_ID()==DisplayType.Date || 
-							m_generalLayout[col].getAD_Reference_ID()==DisplayType.DateTime)
-						value = m_rs.getTimestamp(col+colOffset);
-					
-					else
-						value = m_rs.getObject(col+colOffset);
-											// store
-					detail.setValueAt(m_generalLayout[col],value, row, colIndex, col);
-					if (m_generalLayout[col].isDisplayed())
-						colIndex++;
-				}
-			}
-			
-			
-			
-			/////////////////////END NEWWWWWWWWWWWWWWWWWWWWWWWw///////////////////////
-			//detail.loadTable(m_rs); Replantear
+			detail.loadTable(m_rs);
 		} catch (SQLException e) {
 			log.log(Level.SEVERE, dataSql, e);
 		}
 		DB.close(m_rs, m_pstmt);
 		//
-		//no = detail.getRowCount();
+		int no = detail.getRowCount();
 		log.fine("#" + no + " - " + (System.currentTimeMillis() - start) + "ms");
 		detail.autoSize();
 		//
@@ -1015,10 +914,6 @@ public class WBrowser extends Browser implements IFormController,
 				return null;
 	}
 	
-	/**
-	 * 
-	 */
-	@Override
 	public String getSQLWhere(boolean refresh) {
 		
 		if(!refresh)
@@ -1026,15 +921,15 @@ public class WBrowser extends Browser implements IFormController,
 		
 		m_parameters_values = new ArrayList<Object>();
 		m_parameters = new ArrayList<Object>();
-	
+
 		boolean onRange = false;
 		StringBuilder sql = new StringBuilder(p_whereClause);
-	
+
 		for (Entry<Object, Object> entry : searchGrid.getParamenters().entrySet()) {
 			WEditor editor = (WEditor) entry.getValue();
 			GridFieldVO field = editor.getGridField().getVO();
 			if (!onRange) {
-	
+
 				if (editor.getValue() != null
 						&& !editor.getValue().toString().isEmpty()
 						&& !field.isRange) {
@@ -1046,43 +941,19 @@ public class WBrowser extends Browser implements IFormController,
 						&& !editor.getValue().toString().isEmpty()
 						&& field.isRange) {
 					sql.append(" AND ");
-					/**
-					 * @author Carlos Parada
-					 * @date 18/02/2013 
-					 * Replacing between by >= for resolving bugs in filter
-					 */
-					//sql.append(field.Help).append(" BETWEEN ?");
-					sql.append(field.Help).append(" >= ? ");
+					sql.append(field.Help).append(" BETWEEN ?");
 					m_parameters.add(field.Help);
 					m_parameters_values.add(editor.getValue());
 					onRange = true;
-				/**
-				 * @author Carlos Parada
-				 * @date 18/02/2013 
-				 * Adding Condition when value is null and is range for resolving bugs in filter
-				 */
-				}else if (editor.getValue() == null
-						&& field.isRange) {
-						onRange = true;
-				}
-				else
+				} else
 					continue;
 			} else if (editor.getValue() != null
 					&& !editor.getValue().toString().isEmpty()) {
-				/**
-				 * @author Carlos Parada
-				 * @date 18/02/2013 
-				 * Replacing between by >= for resolving bugs in filter
-				 */
-				//sql.append(" AND ? ");
-				sql.append(" AND ").append(field.Help).append(" <= ? ");
+				sql.append(" AND ? ");
 				m_parameters.add(field.Help);
 				m_parameters_values.add(editor.getValue());
 				onRange = false;
 			}
-			else
-				onRange = false;
-		
 		}
 		m_whereClause = sql.toString();
 		return sql.toString();

@@ -183,11 +183,6 @@ public class GridFieldVO implements Serializable
 					vo.HideInListView = "Y".equals(rs.getString(i));
 				else if (columnName.equalsIgnoreCase("PreferredWidth"))
 					vo.PreferredWidth = rs.getInt(i);
-				//Carlos Parada Allows Copy
-				else if (columnName.equalsIgnoreCase("IsAllowsCopy"))
-					vo.IsAllowsCopy = "Y".equals(rs.getString(i));
-				//End Carlos Parada
-				
 			}
 			if (vo.Header == null)
 				vo.Header = vo.ColumnName;
@@ -287,18 +282,8 @@ public class GridFieldVO implements Serializable
 		voT.IsMandatory = voF.IsMandatory;
 		voT.FieldLength = voF.FieldLength;
 		voT.DisplayLength = voF.FieldLength;
-		/*
-		 * Dixon Martinez
-		 * Modification of the class to solve copying the default values ​​of
-		 * the parameters in reports
-		 */
-		//voT.DefaultValue = voF.DefaultValue;
-		//voT.DefaultValue2 = voF.DefaultValue2;
-		
-		voT.DefaultValue = voF.DefaultValue2;	
-		/*
-		 * End Dixon Martinez
-		 */
+		voT.DefaultValue = voF.DefaultValue;
+		voT.DefaultValue2 = voF.DefaultValue2;
 		voT.VFormat = voF.VFormat;
 		voT.ValueMin = voF.ValueMin;
 		voT.ValueMax = voF.ValueMax;
@@ -465,8 +450,6 @@ public class GridFieldVO implements Serializable
 	/**	Display Obscure	*/
 	public String		ObscureType = null;
 
-	/** Carlos Parada IsAllowsCopy */
-	public boolean IsAllowsCopy = false;
 
 	/**	Lookup Validation code	*/
 	public String		ValidationCode = "";
@@ -504,7 +487,7 @@ public class GridFieldVO implements Serializable
 	/**
 	 *  Validate Fields and create LookupInfo if required
 	 */
-	public void initFinish()
+	protected void initFinish()
 	{
 		//  Not null fields
 		if (DisplayLogic == null)

@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_Browse_Field
  *  @author Adempiere (generated) 
- *  @version Release 3.6.0LTS
+ *  @version Release 3.7.0LTS
  */
 public interface I_AD_Browse_Field 
 {
@@ -45,10 +45,10 @@ public interface I_AD_Browse_Field
     /** Column name AD_Browse_Field_ID */
     public static final String COLUMNNAME_AD_Browse_Field_ID = "AD_Browse_Field_ID";
 
-	/** Set Smart Browse Fields ID	  */
+	/** Set Browse Field	  */
 	public void setAD_Browse_Field_ID (int AD_Browse_Field_ID);
 
-	/** Get Smart Browse Fields ID	  */
+	/** Get Browse Field	  */
 	public int getAD_Browse_Field_ID();
 
     /** Column name AD_Browse_ID */
@@ -83,7 +83,7 @@ public interface I_AD_Browse_Field
 	  */
 	public int getAD_Element_ID();
 
-	public I_AD_Element getAD_Element() throws RuntimeException;
+	public org.compiere.model.I_AD_Element getAD_Element() throws RuntimeException;
 
     /** Column name AD_Org_ID */
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
@@ -111,7 +111,7 @@ public interface I_AD_Browse_Field
 	  */
 	public int getAD_Reference_ID();
 
-	public I_AD_Reference getAD_Reference() throws RuntimeException;
+	public org.compiere.model.I_AD_Reference getAD_Reference() throws RuntimeException;
 
     /** Column name AD_Reference_Value_ID */
     public static final String COLUMNNAME_AD_Reference_Value_ID = "AD_Reference_Value_ID";
@@ -126,7 +126,7 @@ public interface I_AD_Browse_Field
 	  */
 	public int getAD_Reference_Value_ID();
 
-	public I_AD_Reference getAD_Reference_Value() throws RuntimeException;
+	public org.compiere.model.I_AD_Reference getAD_Reference_Value() throws RuntimeException;
 
     /** Column name AD_Val_Rule_ID */
     public static final String COLUMNNAME_AD_Val_Rule_ID = "AD_Val_Rule_ID";
@@ -141,7 +141,7 @@ public interface I_AD_Browse_Field
 	  */
 	public int getAD_Val_Rule_ID();
 
-	public I_AD_Val_Rule getAD_Val_Rule() throws RuntimeException;
+	public org.compiere.model.I_AD_Val_Rule getAD_Val_Rule() throws RuntimeException;
 
     /** Column name AD_View_Column_ID */
     public static final String COLUMNNAME_AD_View_Column_ID = "AD_View_Column_ID";
@@ -187,19 +187,6 @@ public interface I_AD_Browse_Field
 	public int getAxis_Parent_Column_ID();
 
 	public org.adempiere.model.I_AD_View_Column getAxis_Parent_Column() throws RuntimeException;
-
-    /** Column name Callout */
-    public static final String COLUMNNAME_Callout = "Callout";
-
-	/** Set Callout.
-	  * Fully qualified class names and method - separated by semicolons
-	  */
-	public void setCallout (String Callout);
-
-	/** Get Callout.
-	  * Fully qualified class names and method - separated by semicolons
-	  */
-	public String getCallout();
 
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
@@ -514,6 +501,21 @@ public interface I_AD_Browse_Field
 	  */
 	public int getUpdatedBy();
 
+    /** Column name VFormat */
+    public static final String COLUMNNAME_VFormat = "VFormat";
+
+	/** Set Value Format.
+	  * Format of the value;
+ Can contain fixed format elements, Variables: "_lLoOaAcCa09"
+	  */
+	public void setVFormat (String VFormat);
+
+	/** Get Value Format.
+	  * Format of the value;
+ Can contain fixed format elements, Variables: "_lLoOaAcCa09"
+	  */
+	public String getVFormat();
+
     /** Column name ValueMax */
     public static final String COLUMNNAME_ValueMax = "ValueMax";
 
@@ -539,19 +541,4 @@ public interface I_AD_Browse_Field
 	  * Minimum Value for a field
 	  */
 	public String getValueMin();
-
-    /** Column name VFormat */
-    public static final String COLUMNNAME_VFormat = "VFormat";
-
-	/** Set Value Format.
-	  * Format of the value;
- Can contain fixed format elements, Variables: "_lLoOaAcCa09"
-	  */
-	public void setVFormat (String VFormat);
-
-	/** Get Value Format.
-	  * Format of the value;
- Can contain fixed format elements, Variables: "_lLoOaAcCa09"
-	  */
-	public String getVFormat();
 }

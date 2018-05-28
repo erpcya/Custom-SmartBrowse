@@ -62,17 +62,11 @@ public class CreateViewColumn extends SvrProcess {
 	protected String doIt() throws Exception {
 		MViewDefinition join = new MViewDefinition(getCtx(), p_Record_ID,
 				get_TrxName());
-		/**
-		 * Carlos Parada
-		 */
-		//Remove Deleted Columns 
-		/*for (MViewColumn vcol : join.getADViewColunms()) {
+
+		for (MViewColumn vcol : join.getADViewColunms()) {
 			vcol.deleteEx(true);
-		}*/
-		/**
-		 * End Carlos Parada
-		 */
-		
+		}
+
 		for (MColumn attr : join.getEntityAttributes()) {
 			MViewColumn column = new MViewColumn(attr);
 			column.setAD_View_Definition_ID(join.getAD_View_Definition_ID());

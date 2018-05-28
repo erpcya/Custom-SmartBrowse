@@ -647,15 +647,5 @@ implements ValueChangeListener, IProcessParameter
 					f.restoreValue();
 			}
 		}
-		
-		/**
-		 * Set Process Info for Smart Browse Process Info
-		 * @author <a href="mailto:carlosaparadam@gmail.com">Carlos Parada</a> 15/2/2015, 18:29:14
-		 * @param m_processInfo
-		 * @return void
-		 */
-		public void setM_processInfo(ProcessInfo m_processInfo) {
-			this.m_processInfo = m_processInfo;
-		}
 	}	//	ProcessParameterPanel
 
